@@ -9,7 +9,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PACKAGE_NAME = "comfyui_dakun333_nodes_test"
+PACKAGE_NAME = "comfyui_rh_nodes_test"
 
 
 def load_package():

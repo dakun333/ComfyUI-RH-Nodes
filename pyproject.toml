@@ -3,7 +3,7 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "comfyui-dakun333-nodes"
+name = "comfyui-rh-nodes"
 version = "1.0.0"
 description = "A maintained ComfyUI image-node collection: reference color restoration and comic outline detection."
 readme = "README.md"
@@ -18,10 +18,10 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/dakun333/ComfyUI-Dakun333-Nodes"
-Documentation = "https://github.com/dakun333/ComfyUI-Dakun333-Nodes#readme"
+Repository = "https://github.com/dakun333/ComfyUI-RH-Nodes"
+Documentation = "https://github.com/dakun333/ComfyUI-RH-Nodes#readme"
 
 [tool.comfy]
 PublisherId = "dakun333"
-DisplayName = "Dakun333 Image Nodes"
+DisplayName = "RH Image Nodes"
 Icon = ""

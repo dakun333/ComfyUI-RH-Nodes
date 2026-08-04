@@ -1,4 +1,4 @@
-"""Dakun333's maintained collection of standalone ComfyUI image nodes."""
+"""RH's maintained collection of standalone ComfyUI image nodes."""
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
@@ -35,7 +35,7 @@ except Exception as exc:  # Keep unrelated node families available when one depe
     _IMPORT_ERRORS.append(f"Comic Outline: {exc}")
 
 if _IMPORT_ERRORS:
-    print("[Dakun333 Nodes] Some node families could not be loaded:")
+    print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 

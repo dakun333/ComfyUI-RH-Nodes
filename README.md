@@ -1,4 +1,4 @@
-# ComfyUI-Dakun333-Nodes
+# ComfyUI-RH-Nodes
 
 统一维护的 ComfyUI 图像节点集合。当前包含参考图颜色还原与漫画轮廓检测；后续节点统一在此仓库接入、测试、发布。
 
@@ -6,8 +6,8 @@
 
 ```powershell
 cd ComfyUI\custom_nodes
-git clone https://github.com/dakun333/ComfyUI-Dakun333-Nodes.git
-cd ComfyUI-Dakun333-Nodes
+git clone https://github.com/dakun333/ComfyUI-RH-Nodes.git
+cd ComfyUI-RH-Nodes
 python -m pip install -r requirements.txt
 ```
 
