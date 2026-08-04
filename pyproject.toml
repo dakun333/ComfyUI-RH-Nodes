@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "comfyui-dakun333-nodes"
+version = "1.0.0"
+description = "A maintained ComfyUI image-node collection: reference color restoration and comic outline detection."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+  { name = "dakun333" },
+]
+dependencies = [
+  "numpy>=1.24",
+  "opencv-python>=4.8",
+]
+
+[project.urls]
+Repository = "https://github.com/dakun333/ComfyUI-Dakun333-Nodes"
+Documentation = "https://github.com/dakun333/ComfyUI-Dakun333-Nodes#readme"
+
+[tool.comfy]
+PublisherId = "dakun333"
+DisplayName = "Dakun333 Image Nodes"
+Icon = ""

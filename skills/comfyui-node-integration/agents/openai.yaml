@@ -1,0 +1,4 @@
+interface:
+  display_name: "ComfyUI 节点整合"
+  short_description: "将本地代码整合、测试并发布为可维护的完整 ComfyUI 节点集合"
+  default_prompt: "Use $comfyui-node-integration to integrate this local ComfyUI node directory into the managed node collection and publish it."
