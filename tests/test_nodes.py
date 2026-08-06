@@ -39,6 +39,8 @@ class NodeCollectionSmokeTests(unittest.TestCase):
             {
                 "CCROcclusionColorRestore",
                 "CCROcclusionColorRestoreAdvanced",
+                "CCROcclusionColorRestoreAdvancedV08",
+                "CCROcclusionColorRestoreAdvancedV1",
                 "ComicOutlineDetect",
             },
         )
@@ -72,6 +74,25 @@ class NodeCollectionSmokeTests(unittest.TestCase):
         ]().restore(reference, reference, False)
         self.assertEqual(tuple(corrected.shape), tuple(reference.shape))
         self.assertTrue(torch.isfinite(corrected).all())
+
+    def test_v1_returns_correction_edge_heatmap(self):
+        torch = self.torch
+        reference = torch.zeros((1, 96, 96, 3), dtype=torch.float32)
+        reference[:, 24:72, 24:72] = torch.tensor((0.25, 0.55, 0.85))
+        node_class = self.package.NODE_CLASS_MAPPINGS[
+            "CCROcclusionColorRestoreAdvancedV1"
+        ]
+        inputs = node_class.INPUT_TYPES()["required"]
+        values = {}
+        for name, value in inputs.items():
+            if name in {"ai_image", "reference_image"}:
+                values[name] = reference
+            else:
+                values[name] = value[1]["default"]
+        outputs = node_class().restore(**values)
+        self.assertEqual(len(outputs), 8)
+        self.assertEqual(tuple(outputs[-1].shape), tuple(reference.shape))
+        self.assertTrue(torch.isfinite(outputs[-1]).all())
 
 
 if __name__ == "__main__":

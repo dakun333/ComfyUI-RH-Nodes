@@ -12,6 +12,7 @@ from .algorithm import RestorationReport, restore_reference_colors
 
 
 CATEGORY = "image/color correction"
+SEAM_HEATMAP_CEILING_RGB_PER_PIXEL = 2.0
 
 
 def _as_image_batch(image: torch.Tensor, name: str) -> torch.Tensor:
@@ -40,32 +41,69 @@ def _resize_reference(reference: np.ndarray, shape: tuple[int, int]) -> np.ndarr
     )
 
 
-def _format_report(index: int, report: RestorationReport, resized: bool) -> str:
-    values = asdict(report)
-    return "\n".join(
-        [
-            f"Batch item {index}",
-            f"reference_resized: {str(resized).lower()}",
-            f"background_rgb: {values['background_rgb']}",
-            f"foreground: {100 * values['foreground_fraction']:.2f}%",
-            f"safe_unchanged: {100 * values['unchanged_fraction']:.2f}%",
-            f"unchanged_threshold: {values['threshold']:.2f}/255",
-            f"safe_MAE_before_to_mapped: {values['before_mae']:.3f} -> "
-            f"{values['mapped_mae']:.3f}/255",
-            f"structurally_rescued_foreground: "
-            f"{100 * values['structural_rescued_fraction']:.2f}%",
-            f"exactly_restored_foreground: "
-            f"{100 * values['hard_restored_fraction']:.2f}%",
-            f"seam_compensated_foreground: "
-            f"{100 * values['seam_compensated_fraction']:.2f}%",
-            f"occlusion_core_foreground: "
-            f"{100 * values['occlusion_core_fraction']:.2f}%",
-            f"occlusion_zone_foreground: "
-            f"{100 * values['occlusion_zone_fraction']:.2f}%",
-            f"occlusion_seam_compensated_foreground: "
-            f"{100 * values['occlusion_seam_compensated_fraction']:.2f}%",
-        ]
+def _generated_correction_edge_heatmap(
+    corrected: np.ndarray, base: np.ndarray
+) -> tuple[np.ndarray, np.ndarray]:
+    """Render hard edges in the algorithm's correction field, not final image edges.
+
+    The fixed 2 RGB-levels/pixel ceiling deliberately matches the earlier seam
+    diagnostics, so different V1 runs remain directly comparable.
+    """
+    correction_luminance = np.mean(corrected - base, axis=2).astype(np.float32)
+    edge_strength = np.hypot(
+        cv2.Sobel(correction_luminance, cv2.CV_32F, 1, 0, ksize=3),
+        cv2.Sobel(correction_luminance, cv2.CV_32F, 0, 1, ksize=3),
+    ) * 255.0
+    levels = np.uint8(
+        np.clip(
+            edge_strength / SEAM_HEATMAP_CEILING_RGB_PER_PIXEL * 255.0,
+            0.0,
+            255.0,
+        )
     )
+    bgr = cv2.applyColorMap(levels, cv2.COLORMAP_TURBO)
+    heatmap = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
+    return heatmap, edge_strength
+
+
+def _format_report(
+    index: int,
+    report: RestorationReport,
+    resized: bool,
+    *,
+    include_component_handoff: bool = False,
+) -> str:
+    values = asdict(report)
+    rows = [
+        f"Batch item {index}",
+        f"reference_resized: {str(resized).lower()}",
+        f"background_rgb: {values['background_rgb']}",
+        f"foreground: {100 * values['foreground_fraction']:.2f}%",
+        f"safe_unchanged: {100 * values['unchanged_fraction']:.2f}%",
+        f"unchanged_threshold: {values['threshold']:.2f}/255",
+        f"safe_MAE_before_to_mapped: {values['before_mae']:.3f} -> "
+        f"{values['mapped_mae']:.3f}/255",
+        f"structurally_rescued_foreground: "
+        f"{100 * values['structural_rescued_fraction']:.2f}%",
+        f"exactly_restored_foreground: "
+        f"{100 * values['hard_restored_fraction']:.2f}%",
+        f"seam_compensated_foreground: "
+        f"{100 * values['seam_compensated_fraction']:.2f}%",
+        f"occlusion_core_foreground: "
+        f"{100 * values['occlusion_core_fraction']:.2f}%",
+        f"occlusion_zone_foreground: "
+        f"{100 * values['occlusion_zone_fraction']:.2f}%",
+        f"occlusion_seam_compensated_foreground: "
+        f"{100 * values['occlusion_seam_compensated_fraction']:.2f}%",
+    ]
+    if include_component_handoff:
+        rows.extend(
+            [
+                f"component_internal_handoff_foreground: "
+                f"{100 * values['component_handoff_fraction']:.2f}%",
+            ]
+        )
+    return "\n".join(rows)
 
 
 def _run_batch(
@@ -73,6 +111,8 @@ def _run_batch(
     reference_image: torch.Tensor,
     *,
     resize_reference: bool,
+    return_seam_heatmap: bool = False,
+    include_component_handoff_report: bool = False,
     **options,
 ):
     edited_batch = _as_image_batch(ai_image, "ai_image")
@@ -91,6 +131,7 @@ def _run_batch(
     occlusion_core_items = []
     occlusion_zone_items = []
     occlusion_compensated_items = []
+    seam_heatmap_items = []
     reports = []
     count = max(edited_count, reference_count)
     for index in range(count):
@@ -110,6 +151,18 @@ def _run_batch(
             reference = _resize_reference(reference, edited.shape[:2])
             resized = True
         try:
+            restored = restore_reference_colors(
+                edited,
+                reference,
+                return_occlusion_masks=True,
+                return_diagnostics=return_seam_heatmap,
+                **options,
+            )
+        except Exception as exc:
+            raise RuntimeError(
+                f"Reference Color Restore (Occlusion) failed at batch item {index}: {exc}"
+            ) from exc
+        if return_seam_heatmap:
             (
                 corrected,
                 foreground,
@@ -118,25 +171,48 @@ def _run_batch(
                 occlusion_core,
                 occlusion_zone,
                 occlusion_compensated,
-            ) = restore_reference_colors(
-                edited,
-                reference,
-                return_occlusion_masks=True,
-                **options,
+                diagnostics,
+            ) = restored
+            seam_heatmap, edge_strength = _generated_correction_edge_heatmap(
+                corrected, diagnostics["base"]
             )
-        except Exception as exc:
-            raise RuntimeError(
-                f"Reference Color Restore (Occlusion) failed at batch item {index}: {exc}"
-            ) from exc
+            seam_heatmap_items.append(seam_heatmap)
+            foreground_strength = edge_strength[foreground]
+            edge_summary = (
+                "\ngenerated_correction_edge_p95: "
+                f"{np.percentile(foreground_strength, 95):.3f} RGB/px "
+                f"(heatmap max={SEAM_HEATMAP_CEILING_RGB_PER_PIXEL:.0f} RGB/px)"
+                if foreground_strength.size
+                else "\ngenerated_correction_edge_p95: n/a"
+            )
+        else:
+            (
+                corrected,
+                foreground,
+                unchanged,
+                report,
+                occlusion_core,
+                occlusion_zone,
+                occlusion_compensated,
+            ) = restored
+            edge_summary = ""
         corrected_items.append(corrected.astype(np.float32))
         foreground_items.append(foreground.astype(np.float32))
         unchanged_items.append(unchanged.astype(np.float32))
         occlusion_core_items.append(occlusion_core.astype(np.float32))
         occlusion_zone_items.append(occlusion_zone.astype(np.float32))
         occlusion_compensated_items.append(occlusion_compensated.astype(np.float32))
-        reports.append(_format_report(index, report, resized))
+        reports.append(
+            _format_report(
+                index,
+                report,
+                resized,
+                include_component_handoff=include_component_handoff_report,
+            )
+            + edge_summary
+        )
 
-    return (
+    outputs = (
         torch.from_numpy(np.stack(corrected_items)),
         torch.from_numpy(np.stack(foreground_items)),
         torch.from_numpy(np.stack(unchanged_items)),
@@ -145,6 +221,9 @@ def _run_batch(
         torch.from_numpy(np.stack(occlusion_compensated_items)),
         "\n\n".join(reports),
     )
+    if return_seam_heatmap:
+        return (*outputs, torch.from_numpy(np.stack(seam_heatmap_items)))
+    return outputs
 
 
 RETURN_TYPES = ("IMAGE", "MASK", "MASK", "MASK", "MASK", "MASK", "STRING")
@@ -217,8 +296,13 @@ class ReferenceColorRestoreOcclusion:
 class ReferenceColorRestoreOcclusionAdvanced:
     """Fully parameterized old node with two local occlusion seam controls."""
 
+    TRUSTED_FIT = False
+    STRUCTURAL_UNCHANGED_CLEANUP = False
+    CONTINUOUS_SEAM_FIELD = False
+    INCLUDE_SEAM_HEATMAP = False
+
     DESCRIPTION = (
-        "Advanced Reference Color Restore. seam_residual_blur and seam_bridge_width "
+        "V0 Advanced Reference Color Restore. seam_residual_blur and seam_bridge_width "
         "apply globally; occlusion_residual_blur and occlusion_bridge_width apply "
         "only around a conservatively detected removed-object occlusion. Set either "
         "occlusion value to 0 to disable the local pass."
@@ -342,11 +426,16 @@ class ReferenceColorRestoreOcclusionAdvanced:
         occlusion_residual_blur,
         occlusion_bridge_width,
         max_samples,
+        component_internal_handoff=False,
+        seam_handoff_smoothing=False,
+        seam_handoff_silhouette_guard=3.0,
     ):
         return _run_batch(
             ai_image,
             reference_image,
             resize_reference=resize_reference,
+            return_seam_heatmap=self.INCLUDE_SEAM_HEATMAP,
+            include_component_handoff_report=self.INCLUDE_SEAM_HEATMAP,
             max_samples=max_samples,
             background_threshold=(
                 None if background_threshold <= 0 else background_threshold
@@ -370,17 +459,99 @@ class ReferenceColorRestoreOcclusionAdvanced:
             seam_bridge_width=seam_bridge_width,
             occlusion_residual_blur=occlusion_residual_blur,
             occlusion_bridge_width=occlusion_bridge_width,
+            component_internal_handoff=component_internal_handoff,
+            seam_handoff_smoothing=seam_handoff_smoothing,
+            seam_handoff_silhouette_guard=seam_handoff_silhouette_guard,
+            continuous_seam_field=self.CONTINUOUS_SEAM_FIELD,
+            trusted_fit=self.TRUSTED_FIT,
+            structural_unchanged_cleanup=self.STRUCTURAL_UNCHANGED_CLEANUP,
         )
+
+
+class ReferenceColorRestoreOcclusionAdvancedV1(
+    ReferenceColorRestoreOcclusionAdvanced
+):
+    """Advanced node with guarded trusted fitting and structural mask cleanup."""
+
+    TRUSTED_FIT = True
+    STRUCTURAL_UNCHANGED_CLEANUP = True
+    CONTINUOUS_SEAM_FIELD = True
+    INCLUDE_SEAM_HEATMAP = True
+    RETURN_TYPES = RETURN_TYPES + ("IMAGE",)
+    RETURN_NAMES = RETURN_NAMES + ("generated_correction_edge_heatmap",)
+    DESCRIPTION = (
+        "V1 uses only high-confidence aligned pixels for a validated affine color "
+        "fit, then removes unchanged regions that lack multi-scale structural "
+        "agreement. Its final heatmap output shows only sharp edges in the "
+        "algorithm's correction field (Turbo; red is >=2 RGB/px). The optional "
+        "seam-handoff smoothing patch keeps the outer silhouette fixed."
+    )
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        types = super().INPUT_TYPES()
+        required = dict(types["required"])
+        required["component_internal_handoff"] = (
+            "BOOLEAN",
+            {
+                "default": False,
+                "tooltip": "Smooth a qualifying independent unchanged island internally while preserving the existing continuous-field result outside it",
+            },
+        )
+        required["seam_handoff_smoothing"] = (
+            "BOOLEAN",
+            {
+                "default": False,
+                "tooltip": "Optional local repair for a continuous-field color-weight handoff. It uses the existing V1 field as the fixed boundary and is off by default.",
+            },
+        )
+        required["seam_handoff_silhouette_guard"] = (
+            "FLOAT",
+            {
+                "default": 3.0,
+                "min": 0.0,
+                "max": 32.0,
+                "step": 0.5,
+                "tooltip": "Inner foreground-silhouette band (pixels) held exactly at the current V1 correction while seam_handoff_smoothing is enabled. 3px is the reviewed default.",
+            },
+        )
+        return {"required": required}
+
+
+class ReferenceColorRestoreOcclusionAdvancedV08(
+    ReferenceColorRestoreOcclusionAdvancedV1
+):
+    """Advanced V1 with only structural unchanged-mask cleanup disabled.
+
+    This is a direct V1 comparison node.  It retains V1's interface,
+    trusted-region affine fit, continuous seam field, correction-edge heatmap,
+    and optional component/seam handoff controls.  The class-level override
+    below is intentionally its sole algorithmic difference from V1.
+    """
+
+    STRUCTURAL_UNCHANGED_CLEANUP = False
+    DESCRIPTION = (
+        "V0.8 is identical to Advanced V1 except that structural cleanup of "
+        "the safe_unchanged mask is disabled for direct comparison."
+    )
 
 
 NODE_CLASS_MAPPINGS = {
     "CCROcclusionColorRestore": ReferenceColorRestoreOcclusion,
     "CCROcclusionColorRestoreAdvanced": ReferenceColorRestoreOcclusionAdvanced,
+    "CCROcclusionColorRestoreAdvancedV08": ReferenceColorRestoreOcclusionAdvancedV08,
+    "CCROcclusionColorRestoreAdvancedV1": ReferenceColorRestoreOcclusionAdvancedV1,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
     "CCROcclusionColorRestore": "Reference Color Restore (Occlusion Seam)",
     "CCROcclusionColorRestoreAdvanced": (
-        "Reference Color Restore (Occlusion Seam Advanced)"
+        "Reference Color Restore (Occlusion Seam Advanced) V0"
+    ),
+    "CCROcclusionColorRestoreAdvancedV08": (
+        "Reference Color Restore (Occlusion Seam Advanced) V0.8"
+    ),
+    "CCROcclusionColorRestoreAdvancedV1": (
+        "Reference Color Restore (Occlusion Seam Advanced) V1"
     ),
 }

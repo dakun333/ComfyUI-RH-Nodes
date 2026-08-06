@@ -36,5 +36,5 @@
 
 | 模块 | 注册 ID |
 | --- | --- |
-| `nodes.py` | `CCROcclusionColorRestore`、`CCROcclusionColorRestoreAdvanced` |
+| `nodes.py` | `CCROcclusionColorRestore`、`CCROcclusionColorRestoreAdvanced`、`CCROcclusionColorRestoreAdvancedV08`、`CCROcclusionColorRestoreAdvancedV1` |
 | `comic_outline.py` | `ComicOutlineDetect` |

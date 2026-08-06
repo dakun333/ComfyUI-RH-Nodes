@@ -18,7 +18,9 @@ python -m pip install -r requirements.txt
 | 节点 | 分类 | 用途 |
 | --- | --- | --- |
 | `Reference Color Restore (Occlusion Seam)` | `image/color correction` | 将 AI 编辑图的颜色还原到对齐的参考图；局部处理物体移除产生的遮挡接缝。 |
-| `Reference Color Restore (Occlusion Seam Advanced)` | `image/color correction` | 暴露完整的颜色拟合、结构保护、接缝与遮挡区参数。 |
+| `Reference Color Restore (Occlusion Seam Advanced) V0` | `image/color correction` | 保持原 Advanced 节点 ID 与 0805 的最近可信像素/Voronoi 接缝传播行为。 |
+| `Reference Color Restore (Occlusion Seam Advanced) V0.8` | `image/color correction` | 使用 V1 的可信区域拟合与连续接缝场，但关闭结构化 unchanged 掩码清理，便于直接对比。 |
+| `Reference Color Restore (Occlusion Seam Advanced) V1` | `image/color correction` | 完整的可信仿射颜色拟合、结构清理、连续接缝场与校正边缘热力图。 |
 | `🎨 漫画轮廓检测 (Comic Outline)` | `🎨 漫画轮廓` | 纯 OpenCV 的漫画/动漫轮廓检测：亮度边缘、LAB 颜色边缘和前景外轮廓融合，无模型下载。 |
 
 ## Reference Color Restore（遮挡接缝）
@@ -31,6 +33,14 @@ python -m pip install -r requirements.txt
 - `report`：每个批次的分析摘要。
 
 两张图必须对齐。尺寸不同默认会报错；只有构图和宽高比仍然对齐时，才打开 `resize_reference`。高级节点中的 `occlusion_residual_blur` 和 `occlusion_bridge_width` 只影响保守检测出的遮挡区域，设为 `0` 可关闭对应局部处理。
+
+### Advanced 版本选择
+
+- **V0**：注册 ID 仍为 `CCROcclusionColorRestoreAdvanced`，用于保持既有 Advanced 工作流不变。
+- **V0.8**：保留 V1 的连续加权残差场、热力图和可选 handoff 控制，仅关闭 `structural_unchanged_cleanup`。
+- **V1**：默认开启可信区域仿射拟合和多尺度结构清理。比其他颜色还原节点多一个 `generated_correction_edge_heatmap` IMAGE 输出；它显示最终校正场的锐利边缘，红色表示每像素至少约 2 个 RGB 级别的校正梯度，是检查接缝的候选信号而非单独的缺陷判据。
+
+V1 的 `component_internal_handoff` 与 `seam_handoff_smoothing` 默认关闭，便于直接比较连续场结果；只有需要研究独立 unchanged 岛或局部连续场交接时才开启。
 
 ## Comic Outline Detect（漫画轮廓）
 
