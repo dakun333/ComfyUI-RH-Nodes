@@ -1,6 +1,6 @@
 # ComfyUI-RH-Nodes
 
-统一维护的 ComfyUI 图像节点集合。当前包含参考图颜色还原与漫画轮廓检测；后续节点统一在此仓库接入、测试、发布。
+统一维护的 ComfyUI 图像节点集合。当前包含参考图颜色还原、漫画轮廓检测与 BBOX 掩码参考图；后续节点统一在此仓库接入、测试、发布。
 
 ## 安装
 
@@ -22,6 +22,7 @@ python -m pip install -r requirements.txt
 | `Reference Color Restore (Occlusion Seam Advanced) V0.8` | `image/color correction` | 使用 V1 的可信区域拟合与连续接缝场，但关闭结构化 unchanged 掩码清理，便于直接对比。 |
 | `Reference Color Restore (Occlusion Seam Advanced) V1` | `image/color correction` | 完整的可信仿射颜色拟合、结构清理、连续接缝场与校正边缘热力图。 |
 | `🎨 漫画轮廓检测 (Comic Outline)` | `🎨 漫画轮廓` | 纯 OpenCV 的漫画/动漫轮廓检测：亮度边缘、LAB 颜色边缘和前景外轮廓融合，无模型下载。 |
+| `BBOX: Mask → 1M Reference Image` | `BBOX Tools` | 将原图 + 黑白掩码转为约 1M 像素、16 对齐的红框参考图和 BBOX 裁切。 |
 
 ## Reference Color Restore（遮挡接缝）
 
@@ -58,6 +59,20 @@ V1 的 `component_internal_handoff` 与 `seam_handoff_smoothing` 默认关闭，
 
 调参建议：线条碎或噪点多时，提高 `edge_percentile`（92–95）或增大 `min_edge_area`；细节不足时降低到 84–88；透明 PNG 出现白边时，尝试把 `alpha_thr` 降到 10–20。
 
+## BBOX: Mask → 1M Reference Image（BBOX 掩码参考图）
+
+输入 `image`（原图）和 `bbox_mask`（同尺寸黑白掩码 IMAGE），输出：
+
+- `reference_image`：缩放到约 1M 像素（宽高均为 16 的倍数）的原图，BBOX 区域用外白内红框标注；框内像素与缩放后原图完全一致。
+- `bbox_crop`：红框内部的精确裁切，宽高为 16 的倍数，可无损贴回 `reference_image` 对应位置。
+
+| 参数 | 默认值 | 说明 |
+| --- | ---: | --- |
+| `mask_threshold` | 0.5 | 掩码中 ≥ 此值的像素视为白色前景，围成 BBOX。 |
+| `target_area` | 1048576 | 目标总像素面积（约 1M）。 |
+| `allow_upscale` | 开启 | 允许小图放大到目标面积；关闭则只缩不放大。 |
+
+注意：`bbox_mask` 必须接 **IMAGE** 输出（非 MASK 输出），且与 `image` 像素对齐、尺寸完全一致。节点支持 IMAGE 批次；若批次内各样本产生不同裁切尺寸会报错，需逐张处理。仅依赖 PyTorch，无额外第三方包。
 ## 维护与新增节点
 
 接入后续节点时，请遵循 [docs/ADDING_NODES.md](docs/ADDING_NODES.md)；该流程也已安装为本机 Codex 技能 `comfyui-node-integration`。仓库会保留节点 ID，避免破坏已有工作流。

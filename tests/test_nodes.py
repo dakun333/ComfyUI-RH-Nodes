@@ -42,6 +42,7 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "CCROcclusionColorRestoreAdvancedV08",
                 "CCROcclusionColorRestoreAdvancedV1",
                 "ComicOutlineDetect",
+                "BBoxMaskToReferenceImage",
             },
         )
 
@@ -94,6 +95,39 @@ class NodeCollectionSmokeTests(unittest.TestCase):
         self.assertEqual(tuple(outputs[-1].shape), tuple(reference.shape))
         self.assertTrue(torch.isfinite(outputs[-1]).all())
 
+
+
+    def test_bbox_mask_reference_produces_aligned_outputs(self):
+        torch = self.torch
+        # 128x128 image with a white square mask region
+        image = torch.full((1, 128, 128, 3), 0.5, dtype=torch.float32)
+        mask = torch.zeros((1, 128, 128, 3), dtype=torch.float32)
+        mask[:, 32:96, 32:96, :] = 1.0
+        node = self.package.NODE_CLASS_MAPPINGS["BBoxMaskToReferenceImage"]()
+        ref, crop = node.make_reference(
+            image=image,
+            bbox_mask=mask,
+            mask_threshold=0.5,
+            target_area=1024 * 1024,
+            allow_upscale=True,
+        )
+        # reference_image is BHWC with 3 channels, H and W divisible by 16
+        self.assertEqual(ref.ndim, 4)
+        self.assertEqual(ref.shape[0], 1)
+        self.assertEqual(ref.shape[3], 3)
+        self.assertEqual(ref.shape[1] % 16, 0)
+        self.assertEqual(ref.shape[2] % 16, 0)
+        # bbox_crop is BHWC with 3 channels, H and W divisible by 16
+        self.assertEqual(crop.ndim, 4)
+        self.assertEqual(crop.shape[0], 1)
+        self.assertEqual(crop.shape[3], 3)
+        self.assertEqual(crop.shape[1] % 16, 0)
+        self.assertEqual(crop.shape[2] % 16, 0)
+        self.assertTrue(torch.isfinite(ref).all())
+        self.assertTrue(torch.isfinite(crop).all())
+        # crop values must be within [0, 1]
+        self.assertGreaterEqual(float(crop.min()), 0.0)
+        self.assertLessEqual(float(crop.max()), 1.0)
 
 if __name__ == "__main__":
     unittest.main()

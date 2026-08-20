@@ -38,3 +38,4 @@
 | --- | --- |
 | `nodes.py` | `CCROcclusionColorRestore`、`CCROcclusionColorRestoreAdvanced`、`CCROcclusionColorRestoreAdvancedV08`、`CCROcclusionColorRestoreAdvancedV1` |
 | `comic_outline.py` | `ComicOutlineDetect` |
+| `bbox_mask_reference.py` | `BBoxMaskToReferenceImage` |

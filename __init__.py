@@ -34,10 +34,20 @@ try:
 except Exception as exc:  # Keep unrelated node families available when one dependency fails.
     _IMPORT_ERRORS.append(f"Comic Outline: {exc}")
 
+try:
+    from .bbox_mask_reference import (
+        NODE_CLASS_MAPPINGS as _BBOX_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _BBOX_DISPLAY_MAPPINGS,
+    )
+
+    _register(_BBOX_MAPPINGS, _BBOX_DISPLAY_MAPPINGS)
+except Exception as exc:  # Keep unrelated node families available when one dependency fails.
+    _IMPORT_ERRORS.append(f"BBOX Mask Reference: {exc}")
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.1.0"
+__version__ = "1.2.0"
