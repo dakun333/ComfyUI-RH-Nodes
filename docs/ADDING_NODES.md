@@ -5,9 +5,9 @@
 ## 1. 接入前检查
 
 1. 阅读源项目的 README、安装说明、许可证与依赖；记录来源仓库和确认的提交。
-2. 查看源项目的 Git 状态、远端和追踪分支。若是复制目录，先确认没有未提交的用户修改。
+2. 查看源项目的 Git 状态、远端和追踪分支。若源目录未被 Git 跟踪，记录这一事实并以文件快照为准，不要误用父项目提交作为来源版本。
 3. 检查源码中是否硬编码了本机路径、模型、密钥或网络地址。密钥绝不提交。
-4. 把依赖和许可证与本仓库作兼容性核对；不确定的许可证或所有权必须先向用户确认。
+4. 把依赖和许可证与本仓库作兼容性核对；不确定的许可证或所有权必须先向用户确认。原创代码应取得作者同意按本仓库许可证发布，并把第三方依赖许可记录到 notices 文档。
 
 ## 2. 实现规则
 
@@ -39,3 +39,5 @@
 | `nodes.py` | `CCROcclusionColorRestore`、`CCROcclusionColorRestoreAdvanced`、`CCROcclusionColorRestoreAdvancedV08`、`CCROcclusionColorRestoreAdvancedV1` |
 | `comic_outline.py` | `ComicOutlineDetect` |
 | `bbox_mask_reference.py` | `BBoxMaskToReferenceImage`、`BBoxRestoreCropToCanvas` |
+| `robust_masked_color_match/` | `RCMRobustMaskedColorMatch`、`RCMCoreFeatherMask` |
+| `original_pixel_restore/` | `OPR_LargeObjectMask`、`OPR_RestrictedComposite`、`OPR_RestoreOriginalPixels`、`OPR_LoadImageICC`、`OPR_SaveImageICC`、`OPR_SaveImagePrecision`、`OPR_DiagnosticSteps` |

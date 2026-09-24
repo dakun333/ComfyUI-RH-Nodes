@@ -44,10 +44,30 @@ try:
 except Exception as exc:  # Keep unrelated node families available when one dependency fails.
     _IMPORT_ERRORS.append(f"BBOX Mask Reference: {exc}")
 
+try:
+    from .robust_masked_color_match import (
+        NODE_CLASS_MAPPINGS as _ROBUST_MATCH_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _ROBUST_MATCH_DISPLAY_MAPPINGS,
+    )
+
+    _register(_ROBUST_MATCH_MAPPINGS, _ROBUST_MATCH_DISPLAY_MAPPINGS)
+except Exception as exc:  # Keep unrelated node families available when one dependency fails.
+    _IMPORT_ERRORS.append(f"Robust Masked Color Match: {exc}")
+
+try:
+    from .original_pixel_restore import (
+        NODE_CLASS_MAPPINGS as _PIXEL_RESTORE_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _PIXEL_RESTORE_DISPLAY_MAPPINGS,
+    )
+
+    _register(_PIXEL_RESTORE_MAPPINGS, _PIXEL_RESTORE_DISPLAY_MAPPINGS)
+except Exception as exc:  # Keep unrelated node families available when one dependency fails.
+    _IMPORT_ERRORS.append(f"Original Pixel Restore: {exc}")
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.3.0"
+__version__ = "1.4.0"
