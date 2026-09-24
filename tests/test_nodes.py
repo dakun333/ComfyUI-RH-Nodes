@@ -44,6 +44,15 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "ComicOutlineDetect",
                 "BBoxMaskToReferenceImage",
                 "BBoxRestoreCropToCanvas",
+                "RCMRobustMaskedColorMatch",
+                "RCMCoreFeatherMask",
+                "OPR_LargeObjectMask",
+                "OPR_RestrictedComposite",
+                "OPR_RestoreOriginalPixels",
+                "OPR_LoadImageICC",
+                "OPR_SaveImageICC",
+                "OPR_SaveImagePrecision",
+                "OPR_DiagnosticSteps",
             },
         )
 
