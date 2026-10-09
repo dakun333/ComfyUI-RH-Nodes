@@ -1,6 +1,6 @@
 # ComfyUI-RH-Nodes
 
-统一维护的 ComfyUI 图像节点集合。当前包含参考图颜色还原、原像素恢复、鲁棒遮罩校色、漫画轮廓检测与 BBOX 参考/还原工具；后续节点统一在此仓库接入、测试、发布。
+统一维护的 ComfyUI 图像节点集合。当前包含参考图颜色还原、原像素恢复、UnMult 抠图、鲁棒遮罩校色、漫画轮廓检测与 BBOX 参考/还原工具；后续节点统一在此仓库接入、测试、发布。
 
 ## 安装
 
@@ -16,7 +16,7 @@ Windows Portable 版通常使用 `..\..\python_embeded\python.exe -m pip install
 
 重启 ComfyUI 后，在节点搜索中输入下面的任一名称。ComfyUI 自带 PyTorch，因此依赖文件不重复安装 `torch`。
 
-从原来两个独立目录迁移时，请先移除或停用 `ComfyUI-Original-Pixel-Restore` 和 `ComfyUI-Robust-Masked-Color-Match`，避免 ComfyUI 同时加载重复节点 ID。保留本仓库这一份即可。
+从原来的独立目录迁移时，请先移除或停用 `ComfyUI-Original-Pixel-Restore`、`ComfyUI-Robust-Masked-Color-Match` 和 `ComfyUI-Mekajiki-UnMult`，避免 ComfyUI 同时加载重复节点 ID。保留本仓库这一份即可。
 
 ## 节点一览
 
@@ -38,6 +38,8 @@ Windows Portable 版通常使用 `..\..\python_embeded\python.exe -m pip install
 | `OPR · 高精度保存＋ICC / Save Precision PNG` | `image/Original Pixel Restore` | 保存 16 位 RGB PNG 或仅在 support 内抖动的 8 位 PNG。 |
 | `OPR · 旧版8位保存 / Legacy Save PNG` | `image/Original Pixel Restore` | 兼容旧工作流的 8 位就近舍入保存。 |
 | `OPR · 九步诊断图 / Diagnostic Steps` | `image/Original Pixel Restore` | 将已捕获中间结果渲染为九步诊断图。 |
+| `UnMult (Auto Background)` | `image/matting` | 从黑底或自动估计的近似纯色底图构造 straight-alpha RGBA。 |
+| `Mask-Guided UnMult (Uniform Background)` | `image/matting` | 使用已知前景不透明度遮罩和统一底色近似，反算半透明区域 RGB。 |
 
 ## Reference Color Restore（遮挡接缝）
 
@@ -158,6 +160,36 @@ exclude_mask ─► Robust Masked Color Match.exclude_mask
 
 OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能占用较多 RAM，单张图内部的长耗时 OpenCV 或求解器调用不会立即响应中断。
 
+## UnMult（纯色底反算透明）
+
+这两个节点输出四通道 straight-alpha `IMAGE` 和单独的 `MASK`。内部 ID 仍为 `MekajikiUnMult` 与 `MekajikiMaskedUnMult`，用于兼容已有工作流；界面使用通用名称。本实现是非官方兼容实现，与同名第三方产品或其权利人不存在隶属、授权或背书关系。
+
+### UnMult (Auto Background)
+
+输入一张 SDR `IMAGE`，支持批次及 1/2/3/4 通道。`auto_background=true` 时，每个批次项目分别从图像边缘聚类估算一个近似纯色底；关闭时使用经典黑底 UnMult 规则。
+
+| 参数 | 默认值 | 说明 |
+| --- | ---: | --- |
+| `black_threshold` | 0 | Alpha 连续黑点，范围 0–255；255 会得到全透明结果。 |
+| `dither` | 0 | RGB 固定可复现抖动，范围 0–1；不改变 Alpha。 |
+| `auto_background` | 开启 | 估计纯色背景；渐变、复杂边缘或主体贴边时建议关闭或改用遮罩引导节点。 |
+
+单张展平图不能唯一确定原始前景 RGB 与 Alpha。节点构造的是满足纯色底假设的实用表示，不保证逐像素恢复原透明素材。近黑底会抑制向下噪声提供 Alpha 证据；这也可能遗漏比底色更暗的真实前景。计算直接发生在 ComfyUI 张量数值空间，最好与原合成使用相同工作色彩空间。
+
+### Mask-Guided UnMult (Uniform Background)
+
+`image` 是展平图，`mask` 必须表示**前景不透明度**：`0=透明，1=不透明`。节点从可信透明区域和遮罩外近邻环带估计一个统一背景颜色，并按 `F=(C-(1-A)B)/A` 构造 RGB。遮罩会在需要时双线性缩放，单帧图像或遮罩均可向另一方批次广播。
+
+当前默认采用方法一（2026-09-30）：RGB 溢出时对所有非负通道使用同一倍率缩小，避免逐通道裁切改变通道比例；严重负值不相容时回退输入 RGB。遮罩引导节点对近黑候选底色采用至少占 20% 样本权重的最暗联合 RGB 色簇，减少残留颜色污染。
+
+`allow_alpha_adjustment` 为可选布尔输入，默认关闭；旧 API 请求省略它仍按关闭执行。开启时采用 gray17（2026-10-09）路线，仅对必要的正溢出像素增加局部 Alpha，上限为 `43/255`（约 16.86 个绝对百分点，并非乘以 1.17）。输出仍为普通有界 straight RGBA，`alpha` 与第四通道一致；合成时应使用输出 Alpha，而非重新挂原 Mask。该方法以编码 RGB `#383838` 为匹配锚点，不能保证所有底色无损一致，白底可能变深，底色噪声或弱渐变也可能被放大。关闭可回到默认方法一。
+
+- ComfyUI 内置 `Load Image.MASK` 对带 Alpha 的 PNG 通常输出反相 Alpha，直接连接本节点前应先反相。本节点输出的 `alpha` 是直接不透明度，可直接连接另一个 Mask-Guided UnMult；接 `Join Image with Alpha`、Porter-Duff 等按反相 Alpha 解释 MASK 的节点前通常也要先反相。四通道 `transparent_rgba` 可直接交给支持 RGBA 的保存节点。
+- 对渐变、纹理或遮罩两侧不同背景，只能消除统一底色的近似分量。
+- 完全没有可信透明/近透明区域时，底色不可观测；节点安全保留 `Alpha>0` 内的输入 RGB，只附加遮罩。
+- 遮罩轮廓、强度或配准错误会留下底色残影，节点不会自行修改遮罩语义。
+- 四通道 `IMAGE` 并非所有 ComfyUI 节点都接受。接 RGB-only 节点时，请先拆分/移除 Alpha，并使用单独的 `alpha` 端口参与合成。
+
 ## 验证
 
 使用 ComfyUI 的 Python 并在仓库目录运行：
@@ -166,7 +198,7 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 & "C:\path\to\ComfyUI\.venv\Scripts\python.exe" -m unittest discover -s tests -p "test_*.py" -v
 ```
 
-当前集成测试使用合成图像和最小 ComfyUI API 桩，不依赖个人素材或固定本机输出目录。测试覆盖根注册、单帧/批次、方法 B、鲁棒校色、遮罩羽化、大物体遮罩、受限合成及 16 位保存核心路径。实际加载验证仍应在 ComfyUI 中执行。
+当前集成测试使用合成图像和最小 ComfyUI API 桩，不依赖个人素材或固定本机输出目录。测试覆盖根注册、单帧/批次、方法 B、UnMult 黑底/纯色底/遮罩反算、鲁棒校色、遮罩羽化、大物体遮罩、受限合成及 16 位保存核心路径。实际加载验证仍应在 ComfyUI 中执行。
 
 真实 ComfyUI 导入及加载/恢复/16 位保存冒烟测试会使用系统临时目录，不启动服务或写入用户输出目录：
 
@@ -181,5 +213,7 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 ## 来源与许可
 
 `Comic Outline Detect` 整合自 [dakun333/ComfyUI-ComicOutline](https://github.com/dakun333/ComfyUI-ComicOutline) 的已发布实现（核对提交 `baf6d0f`）。Original Pixel Restore 与 Robust Masked Color Match 由本次提交者确认为原创代码，并授权并入本仓库按 MIT 许可证发布；首次公开版本以加入本仓库的提交为来源快照。项目许可详见 [LICENSE](LICENSE)。
+
+UnMult Python 实现由本次提交者确认为独立原创，仅参考公开数学行为与公式，不包含从 After Effects AEX 提取、反编译或复制的实现代码，并授权并入本仓库按 MIT 许可证发布。首次公开版本以加入本仓库的提交为来源快照。历史兼容节点 ID 中的名称仅用于已有工作流识别。
 
 `method=B` 依赖单独安装的 GPL 软件包 PyMaxflow 1.3.2；仓库不包含其源码或二进制文件。依赖许可说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

@@ -53,6 +53,8 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "OPR_SaveImageICC",
                 "OPR_SaveImagePrecision",
                 "OPR_DiagnosticSteps",
+                "MekajikiUnMult",
+                "MekajikiMaskedUnMult",
             },
         )
 

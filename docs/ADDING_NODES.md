@@ -41,3 +41,4 @@
 | `bbox_mask_reference.py` | `BBoxMaskToReferenceImage`、`BBoxRestoreCropToCanvas` |
 | `robust_masked_color_match/` | `RCMRobustMaskedColorMatch`、`RCMCoreFeatherMask` |
 | `original_pixel_restore/` | `OPR_LargeObjectMask`、`OPR_RestrictedComposite`、`OPR_RestoreOriginalPixels`、`OPR_LoadImageICC`、`OPR_SaveImageICC`、`OPR_SaveImagePrecision`、`OPR_DiagnosticSteps` |
+| `mekajiki_unmult.py` | `MekajikiUnMult`、`MekajikiMaskedUnMult` |

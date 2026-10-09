@@ -64,10 +64,20 @@ try:
 except Exception as exc:  # Keep unrelated node families available when one dependency fails.
     _IMPORT_ERRORS.append(f"Original Pixel Restore: {exc}")
 
+try:
+    from .mekajiki_unmult import (
+        NODE_CLASS_MAPPINGS as _UNMULT_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _UNMULT_DISPLAY_MAPPINGS,
+    )
+
+    _register(_UNMULT_MAPPINGS, _UNMULT_DISPLAY_MAPPINGS)
+except Exception as exc:  # Keep unrelated node families available when one dependency fails.
+    _IMPORT_ERRORS.append(f"UnMult: {exc}")
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.4.0"
+__version__ = "1.5.0"
