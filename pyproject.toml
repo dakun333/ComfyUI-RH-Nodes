@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-rh-nodes"
-version = "1.4.0"
-description = "A maintained ComfyUI image-node collection with restoration, robust color matching, outlines, and BBOX tools."
+version = "1.5.0"
+description = "A maintained ComfyUI image-node collection with restoration, matting, color matching, outlines, and BBOX tools."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
@@ -31,6 +31,7 @@ Icon = ""
 
 [tool.setuptools]
 license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+include-package-data = false
 packages = [
   "comfyui_rh_nodes",
   "comfyui_rh_nodes.original_pixel_restore",
@@ -43,3 +44,6 @@ comfyui_rh_nodes = "."
 "comfyui_rh_nodes.original_pixel_restore" = "original_pixel_restore"
 "comfyui_rh_nodes.original_pixel_restore.core" = "original_pixel_restore/core"
 "comfyui_rh_nodes.robust_masked_color_match" = "robust_masked_color_match"
+
+[tool.setuptools.exclude-package-data]
+"*" = ["*.pyc", "*.pyo", "__pycache__/*"]
