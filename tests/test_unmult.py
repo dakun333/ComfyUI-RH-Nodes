@@ -216,6 +216,32 @@ class UnMultTests(unittest.TestCase):
         rgba, _ = self.masked_class().apply(image, mask)
         torch.testing.assert_close(rgba[0, 30, 30, :3], torch.tensor([1.0, 0.5, 0.125]))
 
+    def test_severe_negative_channel_does_not_revert_whole_rgb(self):
+        background = torch.tensor([0.2, 0.2, 0.2])
+        image = background.expand(2, 64, 64, 3).clone()
+        image[:, 20:44, 20:44] = torch.tensor([0.8, 0.05, 0.3])
+        mask = torch.zeros((2, 64, 64))
+        mask[:, 20:44, 20:44] = 0.2
+        for adjust in (False, True):
+            rgba, alpha = self.masked_class().apply(image, mask, adjust)
+            # Raw foreground is [3.2, -0.55, 0.7]. Q keeps positive ratios,
+            # instead of reverting the complete pixel to [0.8, 0.05, 0.3].
+            torch.testing.assert_close(
+                rgba[:, 30, 30, :3],
+                torch.tensor([1.0, 0.0, 0.21875]).expand(2, 3),
+            )
+            self.assertTrue(torch.equal(alpha, mask))
+            self.assertTrue(torch.equal(rgba[..., 3], alpha))
+
+    def test_negative_channel_boundary_has_no_whole_pixel_jump(self):
+        image = torch.full((1, 64, 64, 3), 0.2)
+        mask = torch.zeros((1, 64, 64))
+        mask[:, 20:44, 20:44] = 0.2
+        image[:, 20:44, 20:44] = torch.tensor([0.8, 0.109, 0.3])
+        image[:, 20:44, 32:44, 1] = 0.111
+        rgba, _ = self.masked_class().apply(image, mask)
+        torch.testing.assert_close(rgba[0, 30, 25], rgba[0, 30, 35])
+
 
 if __name__ == "__main__":
     unittest.main()
