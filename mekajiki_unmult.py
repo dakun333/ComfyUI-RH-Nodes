@@ -18,8 +18,6 @@ _BACKGROUND_MIN_SUPPORT_PERCENT = 20
 _BACKGROUND_HIGH_CONFIDENCE_PERCENT = 30
 _BACKGROUND_SIDE_SUPPORT_PERCENT = 5
 _DARK_BACKGROUND_MAX_CODE = 64
-_GAMUT_NEGATIVE_TOLERANCE = 2.0 / 255.0
-_GAMUT_NEGATIVE_STRAIGHT_TOLERANCE = 0.25
 
 
 class MekajikiUnMult:
@@ -86,7 +84,8 @@ class MekajikiUnMult:
     CATEGORY = "image/matting"
     DESCRIPTION = (
         "Single-image UnMult with automatic constant-background recovery and "
-        "adaptive compensation for white-background glow artwork."
+        "adaptive compensation for white-background glow artwork. "
+        "Q (2026-10-15): scalar gamut compression without whole-RGB fallback."
     )
 
     @staticmethod
@@ -129,18 +128,15 @@ class MekajikiUnMult:
         divisor: torch.Tensor,
         active: torch.Tensor,
     ) -> torch.Tensor:
-        """Use common RGB scaling for overflow; preserve severe matte mismatches."""
+        """Frozen Q: clip negatives and jointly scale positive overflow.
+
+        A negative channel does not revert the entire pixel to observed RGB.
+        No background-direction rollback or neighborhood recoloring is applied.
+        """
         raw = premultiplied_rgb / divisor.unsqueeze(-1)
         nonnegative = raw.clamp_min(0.0)
         peak = torch.amax(nonnegative, dim=-1, keepdim=True)
         protected = nonnegative / peak.clamp_min(1.0)
-        severe_negative = torch.any(
-            (premultiplied_rgb < -_GAMUT_NEGATIVE_TOLERANCE)
-            & (raw < -_GAMUT_NEGATIVE_STRAIGHT_TOLERANCE),
-            dim=-1,
-            keepdim=True,
-        )
-        protected = torch.where(severe_negative, observed_rgb, protected)
         return torch.where(
             active.unsqueeze(-1), protected, torch.zeros_like(protected)
         )
@@ -412,7 +408,7 @@ class MekajikiMaskedUnMult:
                     {
                         "default": False,
                         "tooltip": (
-                            "Off: Method 1 preserves alpha. On: gray-anchor overflow "
+                            "Off: preserve supplied alpha; Q is the RGB baseline. On: gray-anchor overflow "
                             "recovery with a local alpha increase of at most 43/255 "
                             "(below 17 percentage points). White backgrounds may "
                             "look darker; matte noise may be amplified."
@@ -428,7 +424,9 @@ class MekajikiMaskedUnMult:
     CATEGORY = "image/matting"
     DESCRIPTION = (
         "Use a known opacity mask and one representative background color to "
-        "brighten flattened translucent content without spatial reconstruction seams."
+        "brighten flattened translucent content without spatial reconstruction seams. "
+        "Q (2026-10-15): negative clipping and scalar compression without whole-RGB "
+        "fallback. Optional gray-anchor recovery increases alpha by at most 43/255."
     )
 
     @staticmethod
