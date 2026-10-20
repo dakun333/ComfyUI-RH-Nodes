@@ -17,6 +17,7 @@
 4. 保持既有节点 ID、端口名、参数名、默认值、返回顺序不变，保障已有工作流可恢复。
 5. 合并最小必要依赖到 `requirements.txt`。不要在其中重复声明 ComfyUI 自带的 `torch`，不要固定本机 Python 或模型路径。
 6. 更新 `pyproject.toml` 的版本、说明、GitHub Repository 和 Comfy 元数据；仓库 URL 必须与实际仓库一致。
+7. 分类统一使用 `RHNodes/<子类>`：`color`、`restore`、`matting`、`bbox`、`seedream`、`comic`。分类只决定节点在菜单里的位置，不写入工作流，但新增节点族仍应选一个子类，不要挂根级或塞进通用的 `image/*`。
 
 ## 3. 文档与测试
 
@@ -29,7 +30,7 @@
 
 1. 确认 `.gitignore` 排除 `__pycache__`、虚拟环境、构建物与 `.env`。
 2. 检查 `git status --short` 和 `git diff --check`，确认没有密钥、缓存、绝对本机路径或无关文件。
-3. 在 PowerShell 中执行 GitHub 操作；优先使用 HTTPS 和 `gh auth git-credential`。推送失败时先保留本地提交，再排查网络或凭据，禁止 force push。
+3. 在 PowerShell 中执行 GitHub 操作；优先使用 HTTPS 和 `gh auth git-credential`。推送失败时先保留本地提交，再排查网络或凭据；不要对 `main` force push，自己的分支需要时使用 `--force-with-lease`。
 4. 推送后核对远端默认分支、README、文件清单和最新提交 SHA；必要时创建带验证说明的 Release。
 
 ## 本仓库当前节点族
