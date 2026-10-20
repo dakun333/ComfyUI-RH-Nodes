@@ -17,12 +17,13 @@ description: "在 dakun333/ComfyUI-RH-Nodes 中提交改动的固定流程：分
 
 ## 步骤
 
-1. 同步并开分支。分支名用 `人名/类型-简述`，例如 `1hew/fix-unmult-alpha`：
+1. 同步并开分支。分支名用 `<类型>/<简述>`（Conventional Branch 的 `<type>/<description>`），例如 `fix/unmult-alpha`：
    ```powershell
    git switch main
    git pull --ff-only
-   git switch -c <人名>/<fix|feat|chore|docs>-<简述>
+   git switch -c <feat|fix|chore|docs|refactor|test|perf|ci>/<简述>
    ```
+   类型说明改动性质，简述用连字符小写英文；有 Issue 编号时写成 `fix/12-unmult-alpha`。**不要把人名放进分支名**：PR 列表和提交元数据已经标明作者，分支名应当回答「改什么」，而不是「谁改的」。
    一次改动开一个分支，用完即删；不要用一个常驻分支长期累积改动。
 2. 一个分支只做一件事，并且从最新 `main` 拉出。分支存活越久，合并时冲突越大，也越容易在解冲突时覆盖掉别人已合入的改动。不得改动其他节点家族的 ID、输入名、输出名、默认值（技术规范见 `docs/ADDING_NODES.md`）。
 3. 本地自测：`python -m pytest tests -q`。
