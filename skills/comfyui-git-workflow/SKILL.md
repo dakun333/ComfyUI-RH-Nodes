@@ -38,6 +38,13 @@ description: "在 dakun333/ComfyUI-RH-Nodes 中提交改动的固定流程：分
 - 不在 PR 里声称没有实际运行过的验证
 - 分支不留存：合并后删除远端与本地分支，`main` 始终是唯一长期存在的分支
 
+## 已知坑（操作层面）
+
+1. **推送含 `.github/workflows/` 的提交**：HTTPS 令牌缺 `workflow` scope 时会被拒绝（`refusing to allow a Personal Access Token ... without workflow scope`）。改用 SSH 远端推送（`git push ssh://git@github.com/dakun333/ComfyUI-RH-Nodes.git <分支>`），或给令牌补上该 scope。
+2. **用 REST 合并 PR 可能持续 404**：PR 刚创建、或冒烟刚跑完时，`PUT /repos/{owner}/{repo}/pulls/{n}/merge` 可能连续返回 404，但 PR 自身是 `mergeable: clean`。改走 GraphQL 的 `mergePullRequest` 通常一次成功，或直接在网页点合并。
+3. **仓库没有分支保护**：`git push origin main` 会被接受，但这样没有 PR 记录，等于绕开追溯。推送前先 `git fetch --prune`，避免本地残留已删除的远端分支引用。
+4. **目录是 junction**：真实仓库在 `D:\1hew\ComfyUI-RH-Nodes`，`custom_nodes\ComfyUI-RH-Nodes` 只是目录联接。改完代码要重启 ComfyUI 才生效，且只存在一份文件。
+
 ## 说明
 
 冒烟检查（`.github/workflows/tests.yml`）只提供记录，不作为合并门槛；它跑挂了不代表改动无效，也不阻止合并。节点能用不能用，由作者判断并负责。
