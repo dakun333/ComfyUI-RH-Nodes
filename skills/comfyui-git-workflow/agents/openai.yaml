@@ -1,0 +1,4 @@
+interface:
+  display_name: "提交与协作流程"
+  short_description: "按统一的分支、提交与 PR 记录规范提交改动，作者自查后自行合并"
+  default_prompt: "Use $comfyui-git-workflow to commit and merge this change following the repository's branch, commit and PR conventions."

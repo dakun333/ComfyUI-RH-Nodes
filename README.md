@@ -230,6 +230,8 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 
 接入后续节点时，请遵循 [docs/ADDING_NODES.md](docs/ADDING_NODES.md)；该流程也已安装为本机 Codex 技能 `comfyui-node-integration`。仓库会保留节点 ID，避免破坏已有工作流。
 
+提交与合并流程见 [skills/comfyui-git-workflow/SKILL.md](skills/comfyui-git-workflow/SKILL.md)：`main` 只接受 PR，作者自查后自行合并，冒烟检查只作记录、不构成合并条件。
+
 ## 来源与许可
 
 `Comic Outline Detect` 整合自 [dakun333/ComfyUI-ComicOutline](https://github.com/dakun333/ComfyUI-ComicOutline) 的已发布实现（核对提交 `baf6d0f`）。Original Pixel Restore 与 Robust Masked Color Match 由本次提交者确认为原创代码，并授权并入本仓库按 MIT 许可证发布；首次公开版本以加入本仓库的提交为来源快照。项目许可详见 [LICENSE](LICENSE)。
