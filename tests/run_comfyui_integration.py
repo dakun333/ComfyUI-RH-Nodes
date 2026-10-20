@@ -55,6 +55,9 @@ def main():
             "OPR_DiagnosticSteps",
             "MekajikiUnMult",
             "MekajikiMaskedUnMult",
+            "SeedreamLayerColorReuseV64",
+            "SeedreamLayerColorReuseV64Fast",
+            "SeedreamV64LoadAlignedLayers",
         }
         registered = set(package.NODE_CLASS_MAPPINGS)
         if not expected <= registered:
@@ -82,6 +85,18 @@ def main():
         loaded, profile = package.NODE_CLASS_MAPPINGS["OPR_LoadImageICC"]().load(
             "source.png"
         )
+        layer_folder = input_directory / "layers"
+        layer_folder.mkdir()
+        Image.fromarray(image).convert("RGBA").save(layer_folder / "layer_1.png")
+        layers, masks, _ = package.NODE_CLASS_MAPPINGS[
+            "SeedreamV64LoadAlignedLayers"
+        ]().load("layers")
+        for node_id in ("SeedreamLayerColorReuseV64", "SeedreamLayerColorReuseV64Fast"):
+            result = package.NODE_CLASS_MAPPINGS[node_id]().correct_and_reuse(
+                [loaded], [layers], normalize_alpha_levels=[False], image_masks=[masks]
+            )
+            if len(result) != 8 or result[7].shape != (1, 64, 64, 4):
+                raise RuntimeError("Seedream layer reuse returned unexpected outputs")
         restored = package.NODE_CLASS_MAPPINGS[
             "OPR_RestoreOriginalPixels"
         ]().restore(loaded, loaded, capture_steps=False)

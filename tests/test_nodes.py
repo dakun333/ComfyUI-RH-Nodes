@@ -55,6 +55,9 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "OPR_DiagnosticSteps",
                 "MekajikiUnMult",
                 "MekajikiMaskedUnMult",
+                "SeedreamLayerColorReuseV64",
+                "SeedreamLayerColorReuseV64Fast",
+                "SeedreamV64LoadAlignedLayers",
             },
         )
 

@@ -74,10 +74,20 @@ try:
 except Exception as exc:  # Keep unrelated node families available when one dependency fails.
     _IMPORT_ERRORS.append(f"UnMult: {exc}")
 
+try:
+    from .seedream_color_reuse import (
+        NODE_CLASS_MAPPINGS as _SEEDREAM_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _SEEDREAM_DISPLAY_MAPPINGS,
+    )
+
+    _register(_SEEDREAM_MAPPINGS, _SEEDREAM_DISPLAY_MAPPINGS)
+except Exception as exc:
+    _IMPORT_ERRORS.append(f"Seedream Layer Color Reuse: {exc}")
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.5.1"
+__version__ = "1.6.0"
