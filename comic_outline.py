@@ -202,7 +202,7 @@ class ComicOutlineDetect:
         "Fuses luminance, LAB colour-boundary, and optional foreground-outline edges. "
         "Works entirely with OpenCV and supports IMAGE batches."
     )
-    CATEGORY = "🎨 漫画轮廓"
+    CATEGORY = "RHNodes/comic"
     FUNCTION = "detect"
     RETURN_TYPES = ("IMAGE",)
     RETURN_NAMES = ("轮廓图",)

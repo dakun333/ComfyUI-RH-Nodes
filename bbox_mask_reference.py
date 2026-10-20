@@ -291,7 +291,7 @@ class BBoxMaskToReferenceImage:
     RETURN_TYPES = ("IMAGE", "IMAGE", "BBOX_CROP_INFO", "STRING", "BBOX_STRETCH_INFO")
     RETURN_NAMES = ("reference_image", "bbox_crop", "crop_info", "crop_info_json", "stretch_info")
     FUNCTION = "make_reference"
-    CATEGORY = "BBOX Tools"
+    CATEGORY = "RHNodes/bbox"
 
     def make_reference(
         self,
@@ -546,7 +546,7 @@ class BBoxRestoreCropToCanvas:
     RETURN_TYPES = ("IMAGE", "MASK", "IMAGE", "MASK")
     RETURN_NAMES = ("restored_image", "alpha_mask", "working_image_16", "working_alpha_mask")
     FUNCTION = "restore"
-    CATEGORY = "BBOX Tools"
+    CATEGORY = "RHNodes/bbox"
 
     def restore(
         self,
