@@ -1,0 +1,642 @@
+{
+  "last_node_id": 12,
+  "last_link_id": 12,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        20,
+        40
+      ],
+      "size": [
+        340,
+        320
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            11
+          ],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "seedream_v64_examples/01_perfect_combo/reference.png",
+        "image"
+      ],
+      "title": "参考图｜PERFECT COMBO 标志（MASK 已接入）"
+    },
+    {
+      "id": 2,
+      "type": "SeedreamV64LoadAlignedLayers",
+      "pos": [
+        20,
+        430
+      ],
+      "size": [
+        430,
+        180
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            2
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "masks",
+          "type": "MASK",
+          "links": null,
+          "slot_index": 1
+        },
+        {
+          "name": "file_order_json",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeedreamV64LoadAlignedLayers"
+      },
+      "widgets_values": [
+        "seedream_v64_examples/01_perfect_combo/layers",
+        "layer_*.png",
+        "descending"
+      ],
+      "title": "读取 5 个已对齐图层（顶层→底层）"
+    },
+    {
+      "id": 3,
+      "type": "SeedreamLayerColorReuseV64",
+      "pos": [
+        540,
+        150
+      ],
+      "size": [
+        470,
+        450
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "reference",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 2
+        },
+        {
+          "name": "image_masks",
+          "type": "MASK",
+          "link": null
+        },
+        {
+          "name": "reference_mask",
+          "type": "MASK",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "reuse_image",
+          "type": "IMAGE",
+          "links": [
+            4
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "reuse_mask",
+          "type": "MASK",
+          "links": [
+            5
+          ],
+          "slot_index": 2
+        },
+        {
+          "name": "difference_heatmaps",
+          "type": "IMAGE",
+          "links": [
+            7
+          ],
+          "slot_index": 3
+        },
+        {
+          "name": "mae_before",
+          "type": "FLOAT",
+          "links": [
+            8
+          ],
+          "slot_index": 4
+        },
+        {
+          "name": "mae_after",
+          "type": "FLOAT",
+          "links": [
+            9
+          ],
+          "slot_index": 5
+        },
+        {
+          "name": "mae_reduction",
+          "type": "FLOAT",
+          "links": [
+            10
+          ],
+          "slot_index": 6
+        },
+        {
+          "name": "拼接结果",
+          "type": "IMAGE",
+          "links": [
+            12
+          ],
+          "slot_index": 7
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SeedreamLayerColorReuseV64"
+      },
+      "widgets_values": [
+        "top_to_bottom",
+        true,
+        40.0,
+        "comfy_transparency"
+      ],
+      "title": "V6.4 双次校色 + 严格像素复用"
+    },
+    {
+      "id": 4,
+      "type": "SaveImage",
+      "pos": [
+        1100,
+        20
+      ],
+      "size": [
+        380,
+        340
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveImage"
+      },
+      "widgets_values": [
+        "seedream_v64/01_perfect_combo/corrected_layer"
+      ],
+      "title": "保存校色复用后的 RGBA 图层"
+    },
+    {
+      "id": 5,
+      "type": "PreviewImage",
+      "pos": [
+        1100,
+        410
+      ],
+      "size": [
+        360,
+        380
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "复用情况：绿=复用，红=冲突"
+    },
+    {
+      "id": 6,
+      "type": "MaskToImage",
+      "pos": [
+        1080,
+        850
+      ],
+      "size": [
+        250,
+        90
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToImage"
+      },
+      "widgets_values": [],
+      "title": "严格复用 MASK 转图像"
+    },
+    {
+      "id": 7,
+      "type": "PreviewImage",
+      "pos": [
+        1100,
+        990
+      ],
+      "size": [
+        360,
+        350
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 6
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "严格复用区域（白色）"
+    },
+    {
+      "id": 8,
+      "type": "PreviewImage",
+      "pos": [
+        1530,
+        410
+      ],
+      "size": [
+        390,
+        430
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 7
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "差异热力图批次：第1张校前 / 第2张校后"
+    },
+    {
+      "id": 9,
+      "type": "PreviewAny",
+      "pos": [
+        1530,
+        20
+      ],
+      "size": [
+        300,
+        105
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "title": "MAE 校正前"
+    },
+    {
+      "id": 10,
+      "type": "PreviewAny",
+      "pos": [
+        1530,
+        150
+      ],
+      "size": [
+        300,
+        105
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "title": "MAE 校正后"
+    },
+    {
+      "id": 11,
+      "type": "PreviewAny",
+      "pos": [
+        1870,
+        85
+      ],
+      "size": [
+        300,
+        105
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": null,
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "title": "MAE 改善值（正数=改善）"
+    },
+    {
+      "id": 12,
+      "type": "PreviewImage",
+      "pos": [
+        1950,
+        410
+      ],
+      "size": [
+        420,
+        430
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 12
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "拼接结果：校色后图层合成"
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      1,
+      "IMAGE"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      4,
+      3,
+      1,
+      5,
+      0,
+      "IMAGE"
+    ],
+    [
+      5,
+      3,
+      2,
+      6,
+      0,
+      "MASK"
+    ],
+    [
+      6,
+      6,
+      0,
+      7,
+      0,
+      "IMAGE"
+    ],
+    [
+      7,
+      3,
+      3,
+      8,
+      0,
+      "IMAGE"
+    ],
+    [
+      8,
+      3,
+      4,
+      9,
+      0,
+      "FLOAT"
+    ],
+    [
+      9,
+      3,
+      5,
+      10,
+      0,
+      "FLOAT"
+    ],
+    [
+      10,
+      3,
+      6,
+      11,
+      0,
+      "FLOAT"
+    ],
+    [
+      11,
+      1,
+      1,
+      3,
+      3,
+      "MASK"
+    ],
+    [
+      12,
+      3,
+      7,
+      12,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "输入：参考图 + 同画布 RGBA 图层",
+      "bounding": [
+        -10,
+        -10,
+        480,
+        660
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {},
+      "id": 1
+    },
+    {
+      "title": "V6.4 双次校色与严格像素复用",
+      "bounding": [
+        500,
+        90,
+        540,
+        540
+      ],
+      "color": "#8b5b9e",
+      "font_size": 24,
+      "flags": {},
+      "id": 2
+    },
+    {
+      "title": "输出与诊断",
+      "bounding": [
+        1050,
+        -30,
+        1440,
+        1410
+      ],
+      "color": "#4f8b55",
+      "font_size": 24,
+      "flags": {},
+      "id": 3
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.68,
+      "offset": [
+        30,
+        40
+      ]
+    }
+  },
+  "version": 0.4
+}

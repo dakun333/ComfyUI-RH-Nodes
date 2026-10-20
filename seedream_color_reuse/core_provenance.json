@@ -1,0 +1,22 @@
+{
+  "source": "Contributor-owned local layer_match engine snapshot",
+  "algorithm_version": "6.4.5-chromatic-contour-continuity",
+  "copied_on": "2026-10-09",
+  "hash_format": "UTF-8 file bytes with LF line endings and exactly one trailing newline",
+  "files_sha256": {
+    "__init__.py": "d03c4e0fe6de9569d75732e1bf2225bb26c9ac697bbf1045d31e7704a8f6f529",
+    "alpha.py": "811f79a9ed684acf3410f2260e1e06fa7e95f2e2f88bf7fd3e014baca3679d55",
+    "borrowing_policy.py": "4c368d71c0d69a3eb4601ad6bd8a951cba54da80eaf925ee24aa4dfa2d1d0505",
+    "color_only.py": "fb63331285212fe14721f59618bd321f929248cda97f333a5b9b8d867cbadf72",
+    "contours.py": "63c610ed7d8adbdaf7065ef084db2eb41c17b10532b8e6bc12633e3bf1c75556",
+    "core.py": "464ac322f672beceeab2abe76b6fdf24ffdd2470c29603c411e6c8d69d6b8e2c",
+    "fast.py": "6c6e308406ff632525f53d9c29981cca39cad7b64f35e68b19502e51836330d9",
+    "frequency_edges.py": "38a34fb84374c5624008e1898b8e29ed28f5510a399cd656506257867447c1c8",
+    "layer_ownership.py": "b3f91349a5863ed20ff583ea35711ae2c7ada8680a1a406659816789a6fa69b3",
+    "model_contours.py": "4d8a3014ed5fe1678ceb9fba4781290a259574eadb044f6dcd96e4e4ee1012a8",
+    "receiver_policy.py": "81fa4af8fbda6a53c9c489f12e51fdf481458f48958ad82a93509b24fd592180",
+    "reuse_seams.py": "4b0d12994ea64aac05b906c142f74a552d8cc5bd67c8d17e5da3473263852541",
+    "shadows.py": "9f32f3656c8e32247f5290cdf62dc9ef68f99de4198f7f8eecfc0ba56e7f0fd7",
+    "surfaces.py": "d3783354ef25ff839eb2f0045d82f7fdfe5dac96498f55e7180b02049d9747f0"
+  }
+}

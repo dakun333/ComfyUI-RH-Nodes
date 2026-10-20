@@ -190,6 +190,26 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 - 遮罩轮廓、强度或配准错误会留下底色残影，节点不会自行修改遮罩语义。
 - 四通道 `IMAGE` 并非所有 ComfyUI 节点都接受。接 RGB-only 节点时，请先拆分/移除 Alpha，并使用单独的 `alpha` 端口参与合成。
 
+## Seedream 分层双次校色与像素复用 V6.4
+
+引擎快照为 `6.4.5-chromatic-contour-continuity`，包含三个兼容节点：
+
+- `Seedream 分层双次校色与像素复用 V6.4`：全层校色、严格参考像素复用及受保护的局部残差修复。
+- `Seedream 分层双次校色与像素复用 V6.4 Fast`：同一算法的 CPU 执行优化，使用至多三个工作线程；速度取决于素材和硬件。
+- `Seedream V6.4 读取已对齐图层`：按自然文件名顺序读取同画布 RGBA PNG。相对目录以 ComfyUI input 为根，绝对路径亦可使用。
+
+`reference` 必须是一张原始参考图；`images` 的批次代表同一个场景的图层，默认顶层到最底层，并非独立场景批次。图层须预先同尺寸、同位置；节点不做几何配准。参考图尺寸不同时采用预乘 Alpha 缩放。
+
+`normalize_alpha_levels` 默认开启，执行 Alpha Levels 3–252。关闭可保留输入的 8 位 Alpha；引擎仍会将浮点 Alpha 舍入到 8 位，并不保留任意浮点 Alpha 精度。RGB 输入图层必须连接一一对应的 `image_masks`。默认 `mask_convention=comfy_transparency`，白色表示透明；使用直接不透明度时选择 `alpha_opacity`。
+
+`color_only` 默认关闭。开启后只学习各层 RGB 颜色映射，不复用参考像素、不运行空间残差或边缘反解；Alpha Levels 为独立开关。标准和 Fast 均支持此模式。
+
+八个输出按原顺序保留：校正 RGBA 图层、复用预览、严格复用 MASK、前后两帧差异热力图、MAE before/after/reduction、单张 straight RGBA `拼接结果`。MAE 只在双方完全不透明的共同像素统计，无共同不透明区域时报错。`heatmap_max` 默认 40，范围 1–255。输出张量位于 CPU。
+
+示例位于 [seedream_color_reuse/examples](seedream_color_reuse/examples)。示例图片并未随仓库提供，运行前需替换参考图和图层目录；已有工作流节点 ID、参数及输出索引均保留。请使用原始模型图层重跑，避免循环输入已经校色的结果。保护、材质和轮廓判断是启发式，并不保证所有素材视觉完美；大图多层可能占用较多内存。
+
+迁移时请停用独立目录 `ComfyUI-Seedream-Layer-Color-Reuse-V64`，避免重复注册。节点及引擎由贡献者确认为原创并同意 MIT 发布；源引擎快照哈希记录于 `seedream_color_reuse/core_provenance.json`。
+
 ## 验证
 
 使用 ComfyUI 的 Python 并在仓库目录运行：
