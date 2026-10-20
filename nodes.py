@@ -11,7 +11,7 @@ import torch
 from .algorithm import RestorationReport, restore_reference_colors
 
 
-CATEGORY = "RHNodes/color"
+CATEGORY = "RH-Nodes/color"
 SEAM_HEATMAP_CEILING_RGB_PER_PIXEL = 2.0
 
 

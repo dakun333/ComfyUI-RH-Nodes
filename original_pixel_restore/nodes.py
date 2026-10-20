@@ -12,7 +12,7 @@ from .core.pipeline import Config, process_pair
 from .core.precision import OUTPUT_MODES, load_rgb, save_png
 
 
-CATEGORY = "RHNodes/restore"
+CATEGORY = "RH-Nodes/restore"
 
 
 def _folder_paths():
