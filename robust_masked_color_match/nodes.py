@@ -106,7 +106,7 @@ class RobustMaskedColorMatch:
     RETURN_TYPES = ("IMAGE", "MASK", "STRING")
     RETURN_NAMES = ("corrected_image", "fit_region_not_blend_mask", "report")
     FUNCTION = "match"
-    CATEGORY = "RHNodes/color"
+    CATEGORY = "RH-Nodes/color"
     DESCRIPTION = (
         "用遮罩外的对应背景像素拟合鲁棒 RGB 仿射变换，再校正整张 target。"
         "白色排除区不参与统计，但仍接受校色。reference 与 target 必须同尺寸、"
@@ -206,7 +206,7 @@ class CoreFeatherMask:
     RETURN_TYPES = ("MASK",)
     RETURN_NAMES = ("blend_mask",)
     FUNCTION = "feather"
-    CATEGORY = "RHNodes/color"
+    CATEGORY = "RH-Nodes/color"
     DESCRIPTION = (
         "物体及安全边距保持严格 1，只在外侧用五次 smoothstep 羽化到 0。"
     )

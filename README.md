@@ -22,26 +22,26 @@ Windows Portable 版通常使用 `..\..\python_embeded\python.exe -m pip install
 
 | 节点 | 分类 | 用途 |
 | --- | --- | --- |
-| `Reference Color Restore (Occlusion Seam)` | `RHNodes/color` | 将 AI 编辑图的颜色还原到对齐的参考图；局部处理物体移除产生的遮挡接缝。 |
-| `Reference Color Restore (Occlusion Seam Advanced) V0` | `RHNodes/color` | 保持原 Advanced 节点 ID 与 0805 的最近可信像素/Voronoi 接缝传播行为。 |
-| `Reference Color Restore (Occlusion Seam Advanced) V0.8` | `RHNodes/color` | 使用 V1 的可信区域拟合与连续接缝场，但关闭结构化 unchanged 掩码清理，便于直接对比。 |
-| `Reference Color Restore (Occlusion Seam Advanced) V1` | `RHNodes/color` | 完整的可信仿射颜色拟合、结构清理、连续接缝场与校正边缘热力图。 |
-| `🎨 漫画轮廓检测 (Comic Outline)` | `RHNodes/comic` | 纯 OpenCV 的漫画/动漫轮廓检测：亮度边缘、LAB 颜色边缘和前景外轮廓融合，无模型下载。 |
-| `BBOX: Mask → 1M Reference Image` | `RHNodes/bbox` | 将原图 + 黑白掩码转为约 1M 像素、16 对齐的红框参考图、裁切与元数据。 |
-| `BBOX: Restore Crop to Canvas` | `RHNodes/bbox` | 将编辑后的 BBOX 裁切贴回画布，可选撤销 16 对齐拉伸。 |
-| `Robust Masked Color Match / 鲁棒遮罩校色` | `RHNodes/color` | 只用排除遮罩外的对应背景像素拟合鲁棒 RGB 仿射变换。 |
-| `Core-Preserving Feather Mask / 保核外羽化` | `RHNodes/color` | 保持物体核心为 1，只在安全边距外侧羽化。 |
-| `OPR · 原像素恢复 / Restore Pixels (B/A)` | `RHNodes/restore` | 在原图网格上定位编辑并限制融合范围，遮罩外精确保留原图张量值。 |
-| `OPR · 大物体删除遮罩 / Large Object Mask` | `RHNodes/restore` | 分离大物体编辑候选、拟合排除、融合和复核遮罩。 |
-| `OPR · 仅遮罩合成 / Restricted Composite` | `RHNodes/restore` | 只按融合遮罩合成，不隐式配准或校色。 |
-| `OPR · 加载图像＋ICC / Load Image` | `RHNodes/restore` | 加载 8 位图像或 16 位 RGB/灰度 PNG，并单独传递 ICC。 |
-| `OPR · 高精度保存＋ICC / Save Precision PNG` | `RHNodes/restore` | 保存 16 位 RGB PNG 或仅在 support 内抖动的 8 位 PNG。 |
-| `OPR · 旧版8位保存 / Legacy Save PNG` | `RHNodes/restore` | 兼容旧工作流的 8 位就近舍入保存。 |
-| `OPR · 九步诊断图 / Diagnostic Steps` | `RHNodes/restore` | 将已捕获中间结果渲染为九步诊断图。 |
-| `UnMult (Auto Background)` | `RHNodes/matting` | 从黑底或自动估计的近似纯色底图构造 straight-alpha RGBA。 |
-| `Mask-Guided UnMult (Uniform Background)` | `RHNodes/matting` | 使用已知前景不透明度遮罩和统一底色近似，反算半透明区域 RGB。 |
+| `Reference Color Restore (Occlusion Seam)` | `RH-Nodes/color` | 将 AI 编辑图的颜色还原到对齐的参考图；局部处理物体移除产生的遮挡接缝。 |
+| `Reference Color Restore (Occlusion Seam Advanced) V0` | `RH-Nodes/color` | 保持原 Advanced 节点 ID 与 0805 的最近可信像素/Voronoi 接缝传播行为。 |
+| `Reference Color Restore (Occlusion Seam Advanced) V0.8` | `RH-Nodes/color` | 使用 V1 的可信区域拟合与连续接缝场，但关闭结构化 unchanged 掩码清理，便于直接对比。 |
+| `Reference Color Restore (Occlusion Seam Advanced) V1` | `RH-Nodes/color` | 完整的可信仿射颜色拟合、结构清理、连续接缝场与校正边缘热力图。 |
+| `🎨 漫画轮廓检测 (Comic Outline)` | `RH-Nodes/comic` | 纯 OpenCV 的漫画/动漫轮廓检测：亮度边缘、LAB 颜色边缘和前景外轮廓融合，无模型下载。 |
+| `BBOX: Mask → 1M Reference Image` | `RH-Nodes/bbox` | 将原图 + 黑白掩码转为约 1M 像素、16 对齐的红框参考图、裁切与元数据。 |
+| `BBOX: Restore Crop to Canvas` | `RH-Nodes/bbox` | 将编辑后的 BBOX 裁切贴回画布，可选撤销 16 对齐拉伸。 |
+| `Robust Masked Color Match / 鲁棒遮罩校色` | `RH-Nodes/color` | 只用排除遮罩外的对应背景像素拟合鲁棒 RGB 仿射变换。 |
+| `Core-Preserving Feather Mask / 保核外羽化` | `RH-Nodes/color` | 保持物体核心为 1，只在安全边距外侧羽化。 |
+| `OPR · 原像素恢复 / Restore Pixels (B/A)` | `RH-Nodes/restore` | 在原图网格上定位编辑并限制融合范围，遮罩外精确保留原图张量值。 |
+| `OPR · 大物体删除遮罩 / Large Object Mask` | `RH-Nodes/restore` | 分离大物体编辑候选、拟合排除、融合和复核遮罩。 |
+| `OPR · 仅遮罩合成 / Restricted Composite` | `RH-Nodes/restore` | 只按融合遮罩合成，不隐式配准或校色。 |
+| `OPR · 加载图像＋ICC / Load Image` | `RH-Nodes/restore` | 加载 8 位图像或 16 位 RGB/灰度 PNG，并单独传递 ICC。 |
+| `OPR · 高精度保存＋ICC / Save Precision PNG` | `RH-Nodes/restore` | 保存 16 位 RGB PNG 或仅在 support 内抖动的 8 位 PNG。 |
+| `OPR · 旧版8位保存 / Legacy Save PNG` | `RH-Nodes/restore` | 兼容旧工作流的 8 位就近舍入保存。 |
+| `OPR · 九步诊断图 / Diagnostic Steps` | `RH-Nodes/restore` | 将已捕获中间结果渲染为九步诊断图。 |
+| `UnMult (Auto Background)` | `RH-Nodes/matting` | 从黑底或自动估计的近似纯色底图构造 straight-alpha RGBA。 |
+| `Mask-Guided UnMult (Uniform Background)` | `RH-Nodes/matting` | 使用已知前景不透明度遮罩和统一底色近似，反算半透明区域 RGB。 |
 
-所有节点统一挂在 `RHNodes/<子类>` 分类下（`color`、`restore`、`matting`、`bbox`、`seedream`、`comic`）。工作流保存的是节点 ID 而不是分类，因此分类调整不影响已有工作流。
+所有节点统一挂在 `RH-Nodes/<子类>` 分类下（`color`、`restore`、`matting`、`bbox`、`seedream`、`comic`）。工作流保存的是节点 ID 而不是分类，因此分类调整不影响已有工作流。
 
 ## Reference Color Restore（遮挡接缝）
 

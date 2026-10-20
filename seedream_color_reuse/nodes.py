@@ -189,7 +189,7 @@ class SeedreamLayerColorReuseV64:
     RETURN_NAMES = ('images', 'reuse_image', 'reuse_mask', 'difference_heatmaps',
                     'mae_before', 'mae_after', 'mae_reduction', '拼接结果')
     FUNCTION = 'correct_and_reuse'
-    CATEGORY = 'RHNodes/seedream'
+    CATEGORY = 'RH-Nodes/seedream'
     DESCRIPTION = ('Double calibration: whole-layer color fit, verified exact reuse, then a '
                    'low-texture-gated second fit only on non-reused pixels. The heatmap output '
                    'contains two frames in order: BEFORE and AFTER. The final IMAGE output '
@@ -322,7 +322,7 @@ class SeedreamV64LoadAlignedLayers:
     RETURN_TYPES = ('IMAGE', 'MASK', 'STRING')
     RETURN_NAMES = ('images', 'masks', 'file_order_json')
     FUNCTION = 'load'
-    CATEGORY = 'RHNodes/seedream'
+    CATEGORY = 'RH-Nodes/seedream'
     DESCRIPTION = ('Loads full-canvas RGBA PNG layers only; it does not read placement metadata '
                    'or perform geometric alignment. Descending layer_XX order is top-to-bottom.')
 

@@ -81,7 +81,7 @@ class MekajikiUnMult:
     RETURN_TYPES = ("IMAGE", "MASK")
     RETURN_NAMES = ("transparent_rgba", "alpha")
     FUNCTION = "apply"
-    CATEGORY = "RHNodes/matting"
+    CATEGORY = "RH-Nodes/matting"
     DESCRIPTION = (
         "Single-image UnMult with automatic constant-background recovery and "
         "adaptive compensation for white-background glow artwork. "
@@ -421,7 +421,7 @@ class MekajikiMaskedUnMult:
     RETURN_TYPES = ("IMAGE", "MASK")
     RETURN_NAMES = ("transparent_rgba", "alpha")
     FUNCTION = "apply"
-    CATEGORY = "RHNodes/matting"
+    CATEGORY = "RH-Nodes/matting"
     DESCRIPTION = (
         "Use a known opacity mask and one representative background color to "
         "brighten flattened translucent content without spatial reconstruction seams. "
