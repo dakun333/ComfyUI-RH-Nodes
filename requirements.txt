@@ -1,5 +1,7 @@
-numpy>=1.26
-opencv-python>=4.10
-pillow>=10
-scipy>=1.12
-PyMaxflow==1.3.2
+# ComfyUI 已经自带 numpy / Pillow / scipy，这里的下限对齐 ComfyUI 自身的
+# requirements，避免给现有环境强制升级；三项都是代码实际 import 的依赖。
+numpy>=1.25
+opencv-python>=4.10,<5   # 5.x 要求 numpy>=2，会把 ComfyUI 的 numpy 1.x 环境顶掉
+pillow>=9.1              # 代码使用 Image.Resampling，9.1 起提供
+scipy                    # cKDTree / cg / distance_transform_edt
+PyMaxflow==1.3.2         # GPL-3.0，仅 method=B 使用，见 THIRD_PARTY_NOTICES.md
