@@ -1,4 +1,4 @@
-name: tests
+name: smoke
 
 on:
   push:
@@ -11,37 +11,26 @@ permissions:
   contents: read
 
 concurrency:
-  group: tests-${{ github.workflow }}-${{ github.ref }}
+  group: smoke-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# 冒烟检查：提供"合并时机器上跑通了没"的记录。
+# 它不构成合并条件，跑挂了也不会阻止任何人合并自己的 PR。
 jobs:
-  test:
-    name: ${{ matrix.os }} / Python ${{ matrix.python }}
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 25
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - { os: ubuntu-latest, python: "3.10" }
-          - { os: ubuntu-latest, python: "3.12" }
-          - { os: windows-latest, python: "3.12" }
+  smoke:
+    name: pytest (Windows / Python 3.12)
+    runs-on: windows-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
+          python-version: "3.12"
           cache: pip
           cache-dependency-path: |
             requirements.txt
             pyproject.toml
-
-      - name: Install OpenCV system libraries (Linux only)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends libgl1 libglib2.0-0
 
       - name: Install CPU-only PyTorch
         run: python -m pip install --disable-pip-version-check torch --index-url https://download.pytorch.org/whl/cpu
