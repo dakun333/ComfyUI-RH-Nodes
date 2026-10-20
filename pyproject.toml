@@ -12,13 +12,7 @@ license = { file = "LICENSE" }
 authors = [
   { name = "dakun333" },
 ]
-dependencies = [
-  "numpy>=1.26",
-  "opencv-python>=4.10",
-  "pillow>=10",
-  "scipy>=1.12",
-  "PyMaxflow==1.3.2",
-]
+dynamic = ["dependencies"]
 
 [project.urls]
 Repository = "https://github.com/dakun333/ComfyUI-RH-Nodes"
@@ -28,6 +22,10 @@ Documentation = "https://github.com/dakun333/ComfyUI-RH-Nodes#readme"
 PublisherId = "dakun333"
 DisplayName = "RH Image Nodes"
 Icon = ""
+
+[tool.setuptools.dynamic]
+# 依赖只在 requirements.txt 维护一份，打包时读取，避免两处漂移。
+dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools]
 license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
