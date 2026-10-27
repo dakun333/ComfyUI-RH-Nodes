@@ -90,4 +90,4 @@ if _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.6.0"
+__version__ = "1.6.1"

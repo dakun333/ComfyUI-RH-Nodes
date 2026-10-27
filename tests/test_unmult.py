@@ -242,6 +242,39 @@ class UnMultTests(unittest.TestCase):
         rgba, _ = self.masked_class().apply(image, mask)
         torch.testing.assert_close(rgba[0, 30, 25], rgba[0, 30, 35])
 
+    def test_thin_edge_nonblack_bypasses_q_and_gray17_for_entire_sample(self):
+        image = torch.full((1, 64, 64, 3), 0.5)
+        image[:, 30:32, 10:54] = torch.tensor([0.8, 0.4, 0.1])
+        mask = torch.zeros((1, 64, 64))
+        mask[:, 30:32, 10:54] = 0.2
+        for adjust in (False, True):
+            rgba, alpha = self.masked_class().apply(image, mask, adjust)
+            self.assertTrue(torch.equal(rgba[..., :3], image))
+            self.assertTrue(torch.equal(alpha, mask))
+            self.assertTrue(torch.equal(rgba[..., 3], mask))
+
+    def test_thin_edge_mixed_batch_retains_near_black_recovery(self):
+        image = torch.zeros((2, 64, 64, 3))
+        image[0] = 0.5
+        image[:, 30:32, 10:54] = torch.tensor([0.8, 0.4, 0.1])
+        mask = torch.zeros((1, 64, 64))
+        mask[:, 30:32, 10:54] = 0.2
+        rgba, alpha = self.masked_class().apply(image, mask, True)
+        self.assertTrue(torch.equal(rgba[0, ..., :3], image[0]))
+        self.assertFalse(torch.equal(rgba[1, ..., :3], image[1]))
+        self.assertGreater(float((alpha[1] - mask[0]).max()), 0)
+        self.assertTrue(torch.equal(rgba[..., 3], alpha))
+
+    def test_thin_edge_policy_thresholds_and_missing_evidence(self):
+        import importlib
+        policy = importlib.import_module(f"{PACKAGE_NAME}.unmult_thin_edge_bypass")
+        self.assertTrue(policy.is_near_black_background(torch.full((3,), 16 / 255)))
+        self.assertFalse(policy.is_near_black_background(torch.tensor([0., 0., 17 / 255])))
+        self.assertFalse(policy.is_near_black_background(None))
+        self.assertFalse(policy.detect_thin_edge(torch.ones((16, 16))).thin_edge_dominant)
+        self.assertFalse(policy.detect_thin_edge(torch.full((16, 16), .5)).thin_edge_dominant)
+        self.assertEqual(policy.scaled_radius((2048, 1024)), 8)
+
 
 if __name__ == "__main__":
     unittest.main()
