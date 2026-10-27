@@ -411,7 +411,9 @@ class MekajikiMaskedUnMult:
                             "Off: preserve supplied alpha; Q is the RGB baseline. On: gray-anchor overflow "
                             "recovery with a local alpha increase of at most 43/255 "
                             "(below 17 percentage points). White backgrounds may "
-                            "look darker; matte noise may be amplified."
+                            "look darker; matte noise may be amplified. Thin-edge "
+                            "subjects on non-near-black backgrounds bypass RGB "
+                            "recovery and alpha adjustment, preserving RGB/mask."
                         ),
                     },
                 ),
@@ -426,7 +428,9 @@ class MekajikiMaskedUnMult:
         "Use a known opacity mask and one representative background color to "
         "brighten flattened translucent content without spatial reconstruction seams. "
         "Q (2026-10-15): negative clipping and scalar compression without whole-RGB "
-        "fallback. Optional gray-anchor recovery increases alpha by at most 43/255."
+        "fallback. Optional gray-anchor recovery increases alpha by at most 43/255. "
+        "Thin-edge preflight preserves whole-sample RGB/mask on known backgrounds "
+        "unless every background channel is <=16/255; Auto Background is unchanged."
     )
 
     @staticmethod
@@ -753,8 +757,20 @@ class MekajikiMaskedUnMult:
 
         recovered = []
         adjusted_alphas = [] if allow_alpha_adjustment else None
+        from .unmult_thin_edge_bypass import detect_thin_edge, is_near_black_background
+
         for sample_rgb, sample_alpha in zip(rgb, alpha):
             background = self._estimate_uniform_background(sample_rgb, sample_alpha)
+            if (
+                background is not None
+                and not is_near_black_background(background)
+                and detect_thin_edge(sample_alpha).thin_edge_dominant
+            ):
+                # Whole normalized sample, including hidden RGB. No Q or gray17.
+                recovered.append(sample_rgb)
+                if allow_alpha_adjustment:
+                    adjusted_alphas.append(sample_alpha)
+                continue
             if background is None:
                 straight = torch.where(
                     (sample_alpha > 0.0).unsqueeze(-1),
