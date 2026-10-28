@@ -209,6 +209,33 @@ class OriginalPixelRestoreTests(unittest.TestCase):
             torch.equal(output[~support.bool()], original.double()[~support.bool()])
         )
 
+    def test_large_mask_original_single_broadcasts_over_edited_batch(self):
+        original = self.scene(96)
+        edited = original.repeat(3, 1, 1, 1).clone()
+        edited[:, 30:65, 35:65] = torch.tensor([0.8, 0.3, 0.2])
+        masks = self.package.NODE_CLASS_MAPPINGS["OPR_LargeObjectMask"]().detect(
+            original,
+            edited,
+            alignment="none",
+            close_radius=2,
+            padding=2,
+            feather=4,
+            exclude_expand=6,
+        )
+        self.assertEqual(len(masks), 8)
+        self.assertEqual(tuple(masks[0].shape), (3, 96, 96))
+        self.assertEqual(tuple(masks[2].shape), (3, 96, 96))
+        self.assertEqual(tuple(masks[4].shape), (3, 96, 96, 3))
+        self.assertEqual(len(json.loads(masks[7])), 3)
+
+    def test_large_mask_mismatched_non_unit_batches_fail(self):
+        original = self.scene(96).repeat(2, 1, 1, 1)
+        edited = self.scene(96).repeat(3, 1, 1, 1)
+        with self.assertRaisesRegex(ValueError, "batches must match"):
+            self.package.NODE_CLASS_MAPPINGS["OPR_LargeObjectMask"]().detect(
+                original, edited, alignment="none"
+            )
+
     def test_large_mask_include_and_protect_priority(self):
         original = self.scene(96)
         include = torch.zeros((1, 96, 96))

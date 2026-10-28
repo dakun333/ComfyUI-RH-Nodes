@@ -152,7 +152,7 @@ blend_mask ───────────────────────
 exclude_mask ─► Robust Masked Color Match.exclude_mask
 ```
 
-将 `OPR · 大物体删除遮罩` 的 `aligned_edited` 接到 Robust 节点的 `target`，`exclude_mask` 接到同名输入，并把 Robust 的 `exclude_expand` 设为 0。最后只用 `blend_mask` 决定覆盖范围。`include_mask` 可强制纳入区域，`protect_mask` 可强制保留原图且优先级最高。
+`OPR · 大物体删除遮罩` 的 `original` 与 `edited` 批次相同，或任一为单帧时向另一侧广播；输出批次取较大值，`include_mask` / `protect_mask` 支持单帧或输出批次。将 `aligned_edited` 接到 Robust 节点的 `target`，`exclude_mask` 接到同名输入，并把 Robust 的 `exclude_expand` 设为 0。最后只用 `blend_mask` 决定覆盖范围。`include_mask` 可强制纳入区域，`protect_mask` 可强制保留原图且优先级最高。
 
 ### ICC 与保存
 

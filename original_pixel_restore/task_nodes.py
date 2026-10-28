@@ -9,15 +9,16 @@ from .core.task_masks import LargeMaskConfig, large_object_mask
 from .nodes import CATEGORY, check_image
 
 
-def check_mask(mask, image, name):
+def check_mask(mask, image, name, batch_size=None):
+    expected_batch = len(image) if batch_size is None else int(batch_size)
     if (
         not isinstance(mask, torch.Tensor)
         or mask.ndim != 3
-        or len(mask) not in (1, len(image))
+        or len(mask) not in (1, expected_batch)
         or tuple(mask.shape[1:]) != tuple(image.shape[1:3])
     ):
         raise ValueError(
-            f"{name}: expected BxHxW matching original; batch 1 or original batch"
+            f"{name}: expected BxHxW matching original; batch 1 or output batch"
         )
     if (
         not torch.isfinite(mask).all()
@@ -32,8 +33,18 @@ class LargeObjectMask:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "original": ("IMAGE",),
-                "edited": ("IMAGE",),
+                "original": (
+                    "IMAGE",
+                    {
+                        "tooltip": "原图；批次可为 1，或与 edited 批次相同。"
+                    },
+                ),
+                "edited": (
+                    "IMAGE",
+                    {
+                        "tooltip": "AI 编辑图；批次可为 1，或与 original 批次相同；单帧会广播到另一侧。"
+                    },
+                ),
                 "alignment": (
                     ["global", "none"],
                     {
@@ -129,7 +140,8 @@ class LargeObjectMask:
     CATEGORY = CATEGORY
     DESCRIPTION = (
         "生成大面积不透明物体的候选编辑、拟合排除和融合遮罩，不提供语义分割"
-        "保证，也不执行最终校色、局部光流或 Poisson。"
+        "保证，也不执行最终校色、局部光流或 Poisson。original 与 edited 批次"
+        "相同，或任一为单帧时向另一侧广播，输出批次取较大值。"
     )
 
     def detect(
@@ -153,14 +165,24 @@ class LargeObjectMask:
 
         check_image(original, "original")
         check_image(edited, "edited")
-        if len(edited) not in (1, len(original)):
-            raise ValueError("edited batch must be 1 or original batch")
+        original_batch = int(original.shape[0])
+        edited_batch = int(edited.shape[0])
+        if (
+            original_batch != edited_batch
+            and original_batch != 1
+            and edited_batch != 1
+        ):
+            raise ValueError(
+                "original and edited batches must match, or one of them must be 1; "
+                f"got {original_batch} and {edited_batch}"
+            )
+        output_batch = max(original_batch, edited_batch)
         for name, mask in (
             ("include_mask", include_mask),
             ("protect_mask", protect_mask),
         ):
             if mask is not None:
-                check_mask(mask, original, name)
+                check_mask(mask, original, name, output_batch)
         config = LargeMaskConfig(
             high=high,
             low=low,
@@ -184,24 +206,21 @@ class LargeObjectMask:
         ]
         columns = [[] for _ in keys]
         reports = []
-        for index in range(len(original)):
+        for index in range(output_batch):
             throw_exception_if_processing_interrupted()
+            original_index = 0 if original_batch == 1 else index
+            edited_index = 0 if edited_batch == 1 else index
             original_array = (
-                original[index].detach().cpu().float().numpy() * 255.0
+                original[original_index].detach().cpu().float().numpy() * 255.0
             )
             edited_array = (
-                edited[min(index, len(edited) - 1)]
-                .detach()
-                .cpu()
-                .float()
-                .numpy()
-                * 255.0
+                edited[edited_index].detach().cpu().float().numpy() * 255.0
             )
             masks = {
                 name: (
                     None
                     if mask is None
-                    else mask[min(index, len(mask) - 1)]
+                    else mask[0 if len(mask) == 1 else index]
                     .detach()
                     .cpu()
                     .float()
