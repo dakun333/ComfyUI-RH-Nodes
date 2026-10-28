@@ -212,7 +212,11 @@ class OriginalPixelRestoreTests(unittest.TestCase):
     def test_large_mask_original_single_broadcasts_over_edited_batch(self):
         original = self.scene(96)
         edited = original.repeat(3, 1, 1, 1).clone()
-        edited[:, 30:65, 35:65] = torch.tensor([0.8, 0.3, 0.2])
+        boxes = ((12, 34, 12, 34), (40, 62, 22, 44), (18, 40, 56, 78))
+        for frame, (y0, y1, x0, x1) in enumerate(boxes):
+            edited[frame, y0:y1, x0:x1] = torch.tensor(
+                (0.9, 0.2 + 0.3 * frame, 0.2)
+            )
         masks = self.package.NODE_CLASS_MAPPINGS["OPR_LargeObjectMask"]().detect(
             original,
             edited,
@@ -222,11 +226,64 @@ class OriginalPixelRestoreTests(unittest.TestCase):
             feather=4,
             exclude_expand=6,
         )
+        edit_mask, aligned = masks[0], masks[4]
         self.assertEqual(len(masks), 8)
-        self.assertEqual(tuple(masks[0].shape), (3, 96, 96))
+        self.assertEqual(tuple(edit_mask.shape), (3, 96, 96))
         self.assertEqual(tuple(masks[2].shape), (3, 96, 96))
-        self.assertEqual(tuple(masks[4].shape), (3, 96, 96, 3))
+        self.assertEqual(tuple(aligned.shape), (3, 96, 96, 3))
         self.assertEqual(len(json.loads(masks[7])), 3)
+        # Each output frame must pair with its own edited frame, not frame 0.
+        for frame, (y0, y1, x0, x1) in enumerate(boxes):
+            self.assertGreater(int(edit_mask[frame, y0:y1, x0:x1].sum()), 0)
+            for other, (oy0, oy1, ox0, ox1) in enumerate(boxes):
+                if other == frame:
+                    continue
+                self.assertEqual(
+                    float(edit_mask[frame, oy0:oy1, ox0:ox1].sum()), 0
+                )
+            self.assertTrue(
+                torch.allclose(aligned[frame], edited[frame], atol=1e-6)
+            )
+
+    def test_large_mask_masks_accept_output_batch(self):
+        original = self.scene(96)
+        edited = original.repeat(2, 1, 1, 1).clone()
+        edited[0, 20:34, 12:30] = 0.9
+        edited[1, 20:34, 12:30] = 0.15
+        include = torch.zeros((2, 96, 96))
+        include[0, 60:72, 70:84] = 1
+        include[1, 78:90, 10:24] = 1
+        protect = torch.zeros((2, 96, 96))
+        protect[0, 2:12, 40:52] = 1
+        protect[1, 30:42, 60:72] = 1
+        detect = self.package.NODE_CLASS_MAPPINGS["OPR_LargeObjectMask"]().detect
+        masks = detect(
+            original,
+            edited,
+            alignment="none",
+            include_mask=include,
+            protect_mask=protect,
+            close_radius=2,
+            padding=2,
+            feather=4,
+            exclude_expand=6,
+        )
+        blend = masks[2]
+        self.assertEqual(tuple(blend.shape), (2, 96, 96))
+        self.assertTrue(torch.all(blend[0, 60:72, 70:84] == 1))
+        self.assertTrue(torch.all(blend[1, 78:90, 10:24] == 1))
+        self.assertEqual(float(blend[0, 78:90, 10:24].sum()), 0)
+        self.assertEqual(float(blend[1, 60:72, 70:84].sum()), 0)
+        self.assertEqual(float(blend[0, 2:12, 40:52].sum()), 0)
+        self.assertEqual(float(blend[1, 30:42, 60:72].sum()), 0)
+        self.assertFalse(torch.equal(blend[0], blend[1]))
+        with self.assertRaisesRegex(ValueError, "batch 1 or output batch"):
+            detect(
+                original,
+                edited,
+                alignment="none",
+                include_mask=torch.zeros((3, 96, 96)),
+            )
 
     def test_large_mask_mismatched_non_unit_batches_fail(self):
         original = self.scene(96).repeat(2, 1, 1, 1)

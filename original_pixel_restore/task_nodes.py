@@ -208,8 +208,9 @@ class LargeObjectMask:
         reports = []
         for index in range(output_batch):
             throw_exception_if_processing_interrupted()
-            original_index = 0 if original_batch == 1 else index
-            edited_index = 0 if edited_batch == 1 else index
+            # A batch of 1 is broadcast across the whole output batch.
+            original_index = min(index, original_batch - 1)
+            edited_index = min(index, edited_batch - 1)
             original_array = (
                 original[original_index].detach().cpu().float().numpy() * 255.0
             )
@@ -220,7 +221,7 @@ class LargeObjectMask:
                 name: (
                     None
                     if mask is None
-                    else mask[0 if len(mask) == 1 else index]
+                    else mask[min(index, len(mask) - 1)]
                     .detach()
                     .cpu()
                     .float()
