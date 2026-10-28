@@ -130,7 +130,7 @@ V1 的 `component_internal_handoff` 与 `seam_handoff_smoothing` 默认关闭，
 
 ### 细小编辑与水印
 
-`OPR · 原像素恢复` 将 `original` 和 `edited` 对齐到原图网格，检测候选编辑区域，并只在 `support_mask` 内写入结果。`edited` 可以单帧广播；输出批次跟随 `original`。
+`OPR · 原像素恢复` 将 `original` 和 `edited` 对齐到原图网格，检测候选编辑区域，并只在 `support_mask` 内写入结果。`original` 与 `edited` 批次相同，或任一为单帧时向另一侧广播；输出批次取两者较大值（例如 1 张原图 + 4 张编辑结果会输出 4 张）。`edit_mask` 同样支持单帧或输出批次。
 
 - `method=B`：全局配准、受限局部光流、鲁棒校色和图割；需要 PyMaxflow。
 - `method=A`：只使用全局配准的基线方法，不执行局部光流和图割。

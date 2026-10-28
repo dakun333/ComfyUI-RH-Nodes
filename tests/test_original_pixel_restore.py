@@ -80,6 +80,52 @@ class OriginalPixelRestoreTests(unittest.TestCase):
         self.assertEqual(tuple(result[0].shape), tuple(original.shape))
         self.assertEqual(float(result[1].sum()), 0)
 
+    def test_original_single_broadcasts_to_edited_batch(self):
+        original = self.scene()
+        edited = original.repeat(3, 1, 1, 1).clone()
+        edited[0, 20:44, 20:44] = 0.9
+        edited[1, 28:40, 12:30] = 0.15
+        edited[2, 8:18, 40:56] = 0.4
+        result = self.restore_class().restore(
+            original, edited, method="A", capture_steps=False
+        )
+        restored, support, corrected = result[0], result[1], result[4]
+        self.assertEqual(tuple(restored.shape), (3, 64, 64, 3))
+        self.assertEqual(tuple(support.shape), (3, 64, 64))
+        self.assertEqual(tuple(corrected.shape), (3, 64, 64, 3))
+        self.assertEqual(len(json.loads(result[5])), 3)
+        for index in range(3):
+            outside = ~support[index].bool()
+            self.assertTrue(
+                torch.equal(restored[index][outside], original[0][outside])
+            )
+
+    def test_mismatched_non_unit_batches_fail(self):
+        original = self.scene().repeat(2, 1, 1, 1)
+        edited = self.scene().repeat(3, 1, 1, 1)
+        with self.assertRaisesRegex(ValueError, "batches must match"):
+            self.restore_class().restore(
+                original, edited, method="A", capture_steps=False
+            )
+
+    def test_edit_mask_broadcasts_to_output_batch(self):
+        original = self.scene()
+        edited = original.repeat(2, 1, 1, 1).clone()
+        edited[:, 20:35, 20:35] = 0.25
+        mask = torch.zeros((1, 64, 64))
+        mask[:, 20:35, 20:35] = 1
+        result = self.restore_class().restore(
+            original,
+            edited,
+            method="A",
+            edit_mask=mask,
+            padding=0,
+            feather=0,
+        )
+        self.assertEqual(tuple(result[0].shape), (2, 64, 64, 3))
+        self.assertEqual(tuple(result[1].shape), (2, 64, 64))
+        self.assertEqual(tuple(result[4].shape), (2, 64, 64, 3))
+
     def test_default_method_b_runs_graph_cut(self):
         original = self.scene()
         edited = original.clone()

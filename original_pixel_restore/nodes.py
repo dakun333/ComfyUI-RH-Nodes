@@ -54,13 +54,13 @@ class RestoreOriginalPixels:
                 "original": (
                     "IMAGE",
                     {
-                        "tooltip": "原图；尺寸及遮罩外张量值保持不变。"
+                        "tooltip": "原图；尺寸及遮罩外张量值保持不变。批次可为 1，或与 edited 批次相同。"
                     },
                 ),
                 "edited": (
                     "IMAGE",
                     {
-                        "tooltip": "AI 编辑图；尺寸可不同，白色 edit_mask 表示使用生成内容。"
+                        "tooltip": "AI 编辑图；尺寸可不同，白色 edit_mask 表示使用生成内容。批次可为 1，或与 original 批次相同；单帧会广播到另一侧。"
                     },
                 ),
                 "method": (["B", "A"], {"default": "B"}),
@@ -138,6 +138,7 @@ class RestoreOriginalPixels:
     CATEGORY = CATEGORY
     DESCRIPTION = (
         "B 方法包含受限配准、鲁棒校色、图割和限制范围融合；A 为全局配准基线。"
+        "original 与 edited 批次相同，或任一为单帧时向另一侧广播，输出批次取较大值。"
         "输出保持浮点，最终量化只在 Save Precision 中发生。自动遮罩不保证语义正确。"
     )
 
@@ -161,18 +162,28 @@ class RestoreOriginalPixels:
 
         check_image(original, "original")
         check_image(edited, "edited")
-        if len(edited) not in (1, len(original)):
-            raise ValueError("edited batch must be 1 or match original batch")
+        original_batch = int(original.shape[0])
+        edited_batch = int(edited.shape[0])
+        if (
+            original_batch != edited_batch
+            and original_batch != 1
+            and edited_batch != 1
+        ):
+            raise ValueError(
+                "original and edited batches must match, or one of them must be 1; "
+                f"got {original_batch} and {edited_batch}"
+            )
+        output_batch = max(original_batch, edited_batch)
         if edit_mask is not None:
             if (
                 not isinstance(edit_mask, torch.Tensor)
                 or edit_mask.ndim != 3
-                or len(edit_mask) not in (1, len(original))
+                or len(edit_mask) not in (1, output_batch)
                 or tuple(edit_mask.shape[1:]) != tuple(original.shape[1:3])
             ):
                 raise ValueError(
                     "edit_mask must be BxHxW at original resolution, batch 1 or "
-                    "original batch"
+                    "output batch"
                 )
             if (
                 not torch.isfinite(edit_mask).all()
@@ -191,14 +202,18 @@ class RestoreOriginalPixels:
             solver_precision=solver_precision,
         )
         results, images, stats = [], [], []
-        progress = ProgressBar(len(original))
-        for index in range(len(original)):
+        progress = ProgressBar(output_batch)
+        for index in range(output_batch):
             throw_exception_if_processing_interrupted()
+            # A batch of 1 is broadcast across the whole output batch.
+            original_index = min(index, original_batch - 1)
+            edited_index = min(index, edited_batch - 1)
             original_array = (
-                original[index].detach().cpu().float().numpy() * np.float32(255)
+                original[original_index].detach().cpu().float().numpy()
+                * np.float32(255)
             )
             edited_array = (
-                edited[min(index, len(edited) - 1)].detach().cpu().float().numpy()
+                edited[edited_index].detach().cpu().float().numpy()
                 * np.float32(255)
             )
             mask = (
@@ -221,17 +236,18 @@ class RestoreOriginalPixels:
             dtype = (
                 torch.float64 if original.dtype == torch.float64 else torch.float32
             )
-            restored = original[index].detach().cpu().to(dtype).clone()
+            restored = original[original_index].detach().cpu().to(dtype).clone()
             active = torch.from_numpy(result["support"])
             restored[active] = torch.from_numpy(
                 result["output_float"] / np.float32(255)
             ).to(restored.dtype)[active]
             assert torch.equal(
-                restored[~active], original[index].detach().cpu()[~active]
+                restored[~active],
+                original[original_index].detach().cpu()[~active],
             )
             result["stats"]["outside_tensor_exact"] = True
             result["stats"]["exact_original_tensor_fraction"] = float(
-                torch.all(restored == original[index].detach().cpu(), dim=-1)
+                torch.all(restored == original[original_index].detach().cpu(), dim=-1)
                 .float()
                 .mean()
             )
