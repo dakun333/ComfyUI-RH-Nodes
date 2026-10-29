@@ -216,9 +216,19 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 
 ## 共享颜色宽带去竖纹
 
+**1.7.1 透明底支持：**可将 Load Image 的 IMAGE 和 MASK 分别接到 `image` 与新增可选 `mask`（白=透明），直接输出 straight RGBA。单帧 MASK 可广播到图像批次；除标准 Load Image 的全零 64×64 不透明占位 MASK 外，尺寸必须相同、不自动缩放。RGBA 可不接 MASK；两者同时提供时 Alpha 必须一致。
+
+透明输入使用 Alpha 加权归一化滤波和专用颜色/尺度证据，隐藏 RGB 不参与分析，不烘焙黑白底。Alpha 不修复；Alpha<0.05 的 RGB 原值保留。完全不透明输入继续使用旧算法。可确认整张 MASK 对应8位 Alpha 时会纠正反相浮点往返误差，避免保存少1码值；任意高精度 MASK 不量化。MASK 是透明度，不是选区。透明分支对有效证据仍有要求，不能保证所有细小透明素材都处理成功。
+
+```text
+Load Image.IMAGE → 共享颜色宽带去竖纹.image
+Load Image.MASK  → 共享颜色宽带去竖纹.mask
+处理图像         → Save Image.images
+```
+
 搜索 `共享颜色宽带去竖纹`（ID `SharedColorBroadbandDestripe`），分类 `RH-Nodes/restore`。用于减轻沿竖直方向延伸的彩色波纹伪影：从单图低梯度证据学习共同 RGB 污染方向，分离结构和材质明暗，再进行两轮宽带残差扣除。无需参考图、模型或下载；不是连续场求解器。连接 `Load Image → 本节点 → Preview/Save Image`，第二个 STRING 输出为每帧 JSON 处理报告。
 
-支持 RGB/RGBA 浮点 BHWC 批次，宽高至少 2px、有限值且在 0–1；在 CPU 逐帧处理，输出 float32、保持原尺寸。RGBA Alpha 透传；标准 Load Image 的独立 MASK 需另行保留。输入按 sRGB 编码值解释，不读取 ICC/EXIF，不做缩放或分块。
+支持 RGB/RGBA 浮点 BHWC 批次，宽高至少 2px、有限值且在 0–1；在 CPU 逐帧处理，输出 float32、保持原尺寸。RGBA Alpha 透传；标准 Load Image 的独立 MASK 接入可选 `mask` 才能保存透明度。输入按 sRGB 编码值解释，不读取 ICC/EXIF，不做缩放或分块。
 
 | 参数 | 默认 / 范围 | 调节建议 |
 | --- | --- | --- |
@@ -233,10 +243,11 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 | `max_color_gradient` | 1.8；0.1–10 | 证据块梯度门槛，增大可能引入真实结构。 |
 | `color_consensus` | 0.94；0.5–0.999 | 方向一致性门槛，增大更严格。 |
 | `output_mode` | `directed8（复现原8位结果）` | 定向8位误差反馈编码，或 `float32（保留处理精度）`；标准 Save Image 仍保存8位。 |
+| `mask` | 可选；HW 或 B×H×W | Load Image 透明度（1透明、0不透明）；接入后输出 RGBA。 |
 
 颜色/尺度证据不足时原值透传，不静默猜尺度，也不代表清理成功。此算法不锁亮度、无最终输出门控或扣除幅度限幅；真实同色波浪纹理可能误删。不要重复叠加处理输出。大图 FFT 需要较多内存。估计仍在8位近似域进行，float32模式带回输入已有小数，并非高位深算法认证。
 
-源节点包含2026-10-23自动尺度和2026-10-28近白证据更新；节点、核心及尺度估计由贡献者确认为原创并授权 MIT 发布。严格历史模式需同时关闭 `auto_scale` 与 `include_near_white`，使用历史手动尺度。迁移时停用独立目录 `ComfyUI-Shared-Color-Destripe`，避免相同 ID 重复加载。
+源节点包含2026-10-23自动尺度、2026-10-28近白证据和2026-10-29透明底更新；来源为未独立 Git 跟踪的本地插件文件快照。节点、核心及尺度估计由贡献者确认为原创并授权 MIT 发布。严格历史模式需同时关闭 `auto_scale` 与 `include_near_white`，使用历史手动尺度。迁移时停用独立目录 `ComfyUI-Shared-Color-Destripe`，避免相同 ID 重复加载。
 
 ## 验证
 
@@ -248,7 +259,7 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 
 当前集成测试使用合成图像和最小 ComfyUI API 桩，不依赖个人素材或固定本机输出目录。测试覆盖根注册、单帧/批次、方法 B、UnMult 黑底/纯色底/遮罩反算、鲁棒校色、遮罩羽化、大物体遮罩、受限合成及 16 位保存核心路径。实际加载验证仍应在 ComfyUI 中执行。
 
-真实 ComfyUI 导入及加载/恢复/16 位保存冒烟测试会使用系统临时目录，不启动服务或写入用户输出目录：
+真实 ComfyUI 导入及加载/恢复/16 位保存冒烟测试还覆盖标准 Load Image/MASK → 去竖纹 → Save Image 的透明 PNG 和完整8位 Alpha 往返；使用系统临时目录，不启动服务或写入用户输出目录：
 
 ```powershell
 & "C:\path\to\ComfyUI\.venv\Scripts\python.exe" tests\run_comfyui_integration.py --comfyui "C:\path\to\ComfyUI"
