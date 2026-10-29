@@ -91,6 +91,30 @@ def main():
         ]().process(loaded.repeat(2, 1, 1, 1), auto_scale=True)
         if cleaned.shape != (2, 64, 64, 3) or len(json.loads(report)["frames"]) != 2:
             raise RuntimeError("Destripe returned unexpected batch outputs")
+        # Exercise the real standard LoadImage -> destripe -> SaveImage alpha path.
+        import nodes as comfy_nodes
+        y, x = np.mgrid[:192, :320]
+        color = np.array([.35, -.5, .8]); color /= np.linalg.norm(color)
+        transparent = np.empty((192, 320, 4), dtype=np.uint8)
+        transparent[..., :3] = np.rint(150 + 3.5*np.cos(2*np.pi*x/12 + .2*np.sin(y/25))[:, :, None]*color)
+        transparent[..., 3] = 0
+        transparent[24:168, 24:296, 3] = 255
+        transparent[20:24, 24:296, 3] = 77
+        transparent[168:172, 24:296, 3] = 77
+        transparent[:4, :256, 3] = np.arange(256, dtype=np.uint8)
+        Image.fromarray(transparent).save(input_directory / "transparent.png")
+        rgb, mask = comfy_nodes.LoadImage().load_image("transparent.png")
+        cleaned_rgba, report = package.NODE_CLASS_MAPPINGS[
+            "SharedColorBroadbandDestripe"
+        ]().process(rgb, mask=mask, auto_scale=True)
+        if json.loads(report)["frames"][0]["status"] != "processed_not_quality_approved":
+            raise RuntimeError("Transparent destripe did not process the typical input")
+        saved_rgba = comfy_nodes.SaveImage().save_images(cleaned_rgba, filename_prefix="transparent/result")
+        entry = saved_rgba["ui"]["images"][0]
+        with Image.open(output_directory / entry["subfolder"] / entry["filename"]) as output_rgba:
+            if output_rgba.mode != "RGBA":
+                raise RuntimeError("Standard SaveImage did not save RGBA")
+            np.testing.assert_array_equal(np.asarray(output_rgba)[..., 3], transparent[..., 3])
         layer_folder = input_directory / "layers"
         layer_folder.mkdir()
         Image.fromarray(image).convert("RGBA").save(layer_folder / "layer_1.png")
@@ -149,7 +173,8 @@ def main():
                 raise RuntimeError(f"Unexpected saved size: {saved_image.size}")
         print(
             json.dumps(
-                {"registered_nodes": len(registered), "output_written": True}
+                {"registered_nodes": len(registered), "output_written": True,
+                 "standard_transparent_png_roundtrip": True}
             )
         )
 
