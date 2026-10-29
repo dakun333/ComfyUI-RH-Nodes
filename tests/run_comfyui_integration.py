@@ -58,6 +58,7 @@ def main():
             "SeedreamLayerColorReuseV64",
             "SeedreamLayerColorReuseV64Fast",
             "SeedreamV64LoadAlignedLayers",
+            "SharedColorBroadbandDestripe",
         }
         registered = set(package.NODE_CLASS_MAPPINGS)
         if not expected <= registered:
@@ -85,6 +86,11 @@ def main():
         loaded, profile = package.NODE_CLASS_MAPPINGS["OPR_LoadImageICC"]().load(
             "source.png"
         )
+        cleaned, report = package.NODE_CLASS_MAPPINGS[
+            "SharedColorBroadbandDestripe"
+        ]().process(loaded.repeat(2, 1, 1, 1), auto_scale=True)
+        if cleaned.shape != (2, 64, 64, 3) or len(json.loads(report)["frames"]) != 2:
+            raise RuntimeError("Destripe returned unexpected batch outputs")
         layer_folder = input_directory / "layers"
         layer_folder.mkdir()
         Image.fromarray(image).convert("RGBA").save(layer_folder / "layer_1.png")

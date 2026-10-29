@@ -84,10 +84,19 @@ try:
 except Exception as exc:
     _IMPORT_ERRORS.append(f"Seedream Layer Color Reuse: {exc}")
 
+try:
+    from .shared_color_destripe import (
+        NODE_CLASS_MAPPINGS as _DESTRIPE_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _DESTRIPE_DISPLAY_MAPPINGS,
+    )
+    _register(_DESTRIPE_MAPPINGS, _DESTRIPE_DISPLAY_MAPPINGS)
+except Exception as exc:
+    _IMPORT_ERRORS.append(f"Shared Color Destripe: {exc}")
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.6.1"
+__version__ = "1.7.0"

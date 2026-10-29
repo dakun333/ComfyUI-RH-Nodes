@@ -58,6 +58,7 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "SeedreamLayerColorReuseV64",
                 "SeedreamLayerColorReuseV64Fast",
                 "SeedreamV64LoadAlignedLayers",
+                "SharedColorBroadbandDestripe",
             },
         )
 

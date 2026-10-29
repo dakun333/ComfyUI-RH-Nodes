@@ -214,6 +214,30 @@ OPR 为 CPU 管线。全分辨率光流、图割、Poisson 和诊断缓存可能
 
 迁移时请停用独立目录 `ComfyUI-Seedream-Layer-Color-Reuse-V64`，避免重复注册。节点及引擎由贡献者确认为原创并同意 MIT 发布；源引擎快照哈希记录于 `seedream_color_reuse/core_provenance.json`。
 
+## 共享颜色宽带去竖纹
+
+搜索 `共享颜色宽带去竖纹`（ID `SharedColorBroadbandDestripe`），分类 `RH-Nodes/restore`。用于减轻沿竖直方向延伸的彩色波纹伪影：从单图低梯度证据学习共同 RGB 污染方向，分离结构和材质明暗，再进行两轮宽带残差扣除。无需参考图、模型或下载；不是连续场求解器。连接 `Load Image → 本节点 → Preview/Save Image`，第二个 STRING 输出为每帧 JSON 处理报告。
+
+支持 RGB/RGBA 浮点 BHWC 批次，宽高至少 2px、有限值且在 0–1；在 CPU 逐帧处理，输出 float32、保持原尺寸。RGBA Alpha 透传；标准 Load Image 的独立 MASK 需另行保留。输入按 sRGB 编码值解释，不读取 ICC/EXIF，不做缩放或分块。
+
+| 参数 | 默认 / 范围 | 调节建议 |
+| --- | --- | --- |
+| `auto_scale` | 新建节点开启 | 从固定 3–96px 探测范围估计每帧尺度，只替换上下界。旧 API 省略时保持手动。 |
+| `include_near_white` | 开启 | 允许近白证据参与颜色和尺度学习；不是背景蒙版，仍校正全图。旧 API 省略亦开启。 |
+| `period_min/max` | 22 / 80；2–1023 / 2.5–1024 | 手动时使用原图像素，必须 min < max；小尺度纹可尝试 10–22。并非固定周期硬切。 |
+| `gain_first/second` | 0.8 / 0.9；0–1 | 降低更保守；两者为0完全旁路。 |
+| `guide_sigma` | 12；0.1–64 | 越小越保护高对比结构，越大误删风险增加。 |
+| `along_ratio` | 0.14；0.01–1 | 竖向污染场平滑比例；过大可能漏掉快速弯曲纹带。 |
+| `across_sigma` | 0.65；0.05–8 | 横向污染场平滑σ；不是模糊最终 RGB。 |
+| `min_color_support` | 6；3–100 | 最少一致证据块数量，增大更保守。 |
+| `max_color_gradient` | 1.8；0.1–10 | 证据块梯度门槛，增大可能引入真实结构。 |
+| `color_consensus` | 0.94；0.5–0.999 | 方向一致性门槛，增大更严格。 |
+| `output_mode` | `directed8（复现原8位结果）` | 定向8位误差反馈编码，或 `float32（保留处理精度）`；标准 Save Image 仍保存8位。 |
+
+颜色/尺度证据不足时原值透传，不静默猜尺度，也不代表清理成功。此算法不锁亮度、无最终输出门控或扣除幅度限幅；真实同色波浪纹理可能误删。不要重复叠加处理输出。大图 FFT 需要较多内存。估计仍在8位近似域进行，float32模式带回输入已有小数，并非高位深算法认证。
+
+源节点包含2026-10-23自动尺度和2026-10-28近白证据更新；节点、核心及尺度估计由贡献者确认为原创并授权 MIT 发布。严格历史模式需同时关闭 `auto_scale` 与 `include_near_white`，使用历史手动尺度。迁移时停用独立目录 `ComfyUI-Shared-Color-Destripe`，避免相同 ID 重复加载。
+
 ## 验证
 
 使用 ComfyUI 的 Python 并在仓库目录运行：

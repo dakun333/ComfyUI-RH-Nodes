@@ -44,3 +44,4 @@
 | `original_pixel_restore/` | `OPR_LargeObjectMask`、`OPR_RestrictedComposite`、`OPR_RestoreOriginalPixels`、`OPR_LoadImageICC`、`OPR_SaveImageICC`、`OPR_SaveImagePrecision`、`OPR_DiagnosticSteps` |
 | `mekajiki_unmult.py` | `MekajikiUnMult`、`MekajikiMaskedUnMult` |
 | `seedream_color_reuse/` | `SeedreamLayerColorReuseV64`、`SeedreamLayerColorReuseV64Fast`、`SeedreamV64LoadAlignedLayers` |
+| `shared_color_destripe/` | `SharedColorBroadbandDestripe` |

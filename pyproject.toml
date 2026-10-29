@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-rh-nodes"
-version = "1.6.1"
+version = "1.7.0"
 description = "A maintained ComfyUI image-node collection with restoration, matting, color matching, outlines, and BBOX tools."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -37,6 +37,7 @@ packages = [
   "comfyui_rh_nodes.robust_masked_color_match",
   "comfyui_rh_nodes.seedream_color_reuse",
   "comfyui_rh_nodes.seedream_color_reuse.engine",
+  "comfyui_rh_nodes.shared_color_destripe",
 ]
 
 [tool.setuptools.package-dir]
@@ -46,6 +47,7 @@ comfyui_rh_nodes = "."
 "comfyui_rh_nodes.robust_masked_color_match" = "robust_masked_color_match"
 "comfyui_rh_nodes.seedream_color_reuse" = "seedream_color_reuse"
 "comfyui_rh_nodes.seedream_color_reuse.engine" = "seedream_color_reuse/engine"
+"comfyui_rh_nodes.shared_color_destripe" = "shared_color_destripe"
 
 [tool.setuptools.package-data]
 "comfyui_rh_nodes.seedream_color_reuse" = ["core_provenance.json", "examples/*.json"]
