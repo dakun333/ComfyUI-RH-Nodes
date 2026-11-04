@@ -144,6 +144,98 @@ class RobustMaskedColorMatchTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.match_class().match(reference, target, mask[..., None])
 
+    def test_rgba_matches_rgb_when_alpha_is_opaque(self):
+        reference, target, mask, _ = fixture()
+        alpha = np.ones(target.shape[:2] + (1,), dtype=np.float32)
+        rgba_reference = torch.from_numpy(
+            np.concatenate([reference, alpha], axis=-1)[None]
+        ).float()
+        rgba_target = torch.from_numpy(
+            np.concatenate([target, alpha], axis=-1)[None]
+        ).float()
+        weights = torch.from_numpy(mask[None]).float()
+
+        rgba_image, _, rgba_report = self.match_class().match(
+            rgba_reference, rgba_target, weights, exclude_expand=4
+        )
+        rgb_image, _, _ = self.match_class().match(
+            rgba_reference[..., :3], rgba_target[..., :3], weights, exclude_expand=4
+        )
+        self.assertEqual(tuple(rgba_image.shape), (1, 96, 112, 4))
+        torch.testing.assert_close(rgba_image[..., :3], rgb_image)
+        torch.testing.assert_close(rgba_image[..., 3], rgba_target[..., 3])
+        frames = json.loads(rgba_report)["frames"][0]
+        self.assertEqual(frames["alpha_excluded_pixels"], 0)
+        self.assertEqual(frames["exclusion_source"], "mask")
+
+    def test_transparent_alpha_is_excluded_from_fit(self):
+        reference, target, mask, matrix = fixture()
+        alpha = np.ones(target.shape[:2] + (1,), dtype=np.float32)
+        alpha[:30, :40] = 0
+        broken_reference = reference.copy()
+        broken_target = target.copy()
+        broken_reference[:30, :40] = 0.05
+        broken_target[:30, :40] = 0.95
+        rgba_reference = torch.from_numpy(
+            np.concatenate([broken_reference, alpha], axis=-1)[None]
+        ).float()
+        rgba_target = torch.from_numpy(
+            np.concatenate([broken_target, alpha], axis=-1)[None]
+        ).float()
+
+        image, region, report = self.match_class().match(
+            rgba_reference, rgba_target, None, exclude_expand=4
+        )
+        frames = json.loads(report)["frames"][0]
+        np.testing.assert_allclose(
+            frames["coefficients_rgb_rowvector"], matrix, atol=1e-8
+        )
+        self.assertEqual(frames["alpha_excluded_pixels"], 30 * 40)
+        self.assertEqual(frames["exclusion_source"], "alpha")
+        self.assertTrue(torch.all(region[:, :30, :40] == 0))
+        torch.testing.assert_close(image[..., 3], rgba_target[..., 3])
+
+        _, _, combined = self.match_class().match(
+            rgba_reference,
+            rgba_target,
+            torch.from_numpy(mask[None]).float(),
+            exclude_expand=4,
+        )
+        self.assertEqual(
+            json.loads(combined)["frames"][0]["exclusion_source"], "mask+alpha"
+        )
+
+    def test_exclude_mask_is_optional(self):
+        reference, target, mask = self.tensors()
+        image, _, report = self.match_class().match(
+            reference, target, exclude_expand=4
+        )
+        frames = json.loads(report)["frames"][0]
+        self.assertEqual(frames["exclusion_source"], "none")
+        self.assertTrue(any("empty" in warning for warning in frames["warnings"]))
+        with_mask, _, _ = self.match_class().match(
+            reference, target, mask, exclude_expand=4
+        )
+        torch.testing.assert_close(image, with_mask)
+
+    def test_mixed_channels_keep_target_alpha(self):
+        reference, target, mask = self.tensors()
+        alpha = torch.ones(1, 96, 112, 1)
+        alpha[:, :20, :24] = 0
+        rgba_target = torch.cat([target, alpha], dim=-1)
+        image, _, report = self.match_class().match(
+            reference, rgba_target, mask, exclude_expand=4
+        )
+        self.assertEqual(tuple(image.shape), (1, 96, 112, 4))
+        torch.testing.assert_close(image[..., 3], alpha[..., 0])
+        frames = json.loads(report)["frames"][0]
+        self.assertEqual(frames["exclusion_source"], "mask+alpha")
+
+    def test_two_channel_image_is_rejected(self):
+        reference, target, mask = self.tensors()
+        with self.assertRaisesRegex(ValueError, "got"):
+            self.match_class().match(reference[..., :2], target, mask)
+
     def test_feather_preserves_core_and_output_batch(self):
         reference, _, mask = self.tensors()
         (feather,) = self.feather_class().feather(

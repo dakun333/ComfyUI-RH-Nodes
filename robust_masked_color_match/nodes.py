@@ -11,15 +11,42 @@ import torch
 from .core import core_feather, match_frame, prepare_mask
 
 
+ALPHA_THRESHOLD = 0.999
+
+
 def _images(value, name):
     if (
         not isinstance(value, torch.Tensor)
         or value.ndim != 4
-        or value.shape[-1] != 3
+        or value.shape[-1] not in (3, 4)
         or any(size == 0 for size in value.shape)
     ):
-        raise ValueError(f"{name}: expected nonempty ComfyUI IMAGE [B,H,W,3]")
+        got = (
+            tuple(int(size) for size in value.shape)
+            if isinstance(value, torch.Tensor)
+            else type(value).__name__
+        )
+        raise ValueError(
+            f"{name}: expected nonempty ComfyUI IMAGE [B,H,W,3] or [B,H,W,4], "
+            f"got {got}"
+        )
     return value
+
+
+def _alpha_planes(value):
+    """Effective alpha [B,H,W] float64 in [0,1], or None if absent/opaque."""
+    if value.shape[-1] != 4:
+        return None
+    alpha = value[..., 3].detach().to(device="cpu", dtype=torch.float64).numpy()
+    if bool((alpha >= ALPHA_THRESHOLD).all()):
+        return None
+    return alpha
+
+
+def _exclusion_source(mask_provided, alpha_excluded):
+    if mask_provided:
+        return "mask+alpha" if alpha_excluded else "mask"
+    return "alpha" if alpha_excluded else "none"
 
 
 def _masks(value):
@@ -48,15 +75,16 @@ class RobustMaskedColorMatch:
             "required": {
                 "reference": (
                     "IMAGE",
-                    {"tooltip": "原始参考图 / original image defining desired colors."},
+                    {
+                        "tooltip": "原始参考图，RGB 或 RGBA；透明 alpha 不参与拟合。"
+                    },
                 ),
                 "target": (
                     "IMAGE",
-                    {"tooltip": "待校色的完整 AI 编辑图 / edited image to correct."},
-                ),
-                "exclude_mask": (
-                    "MASK",
-                    {"tooltip": "白=排除编辑物体，黑=共享背景；不是最终羽化遮罩。"},
+                    {
+                        "tooltip": "待校色的完整 AI 编辑图 / edited image to correct；"
+                        "输出保留它的 alpha。"
+                    },
                 ),
                 "strength": (
                     "FLOAT",
@@ -100,7 +128,16 @@ class RobustMaskedColorMatch:
                         "tooltip": "鲁棒残差阈值，以 0-255 RGB 级数计。",
                     },
                 ),
-            }
+            },
+            "optional": {
+                "exclude_mask": (
+                    "MASK",
+                    {
+                        "tooltip": "白=排除编辑物体，黑=共享背景；可省略。"
+                        "RGBA 输入的透明 alpha 自动并入排除区。",
+                    },
+                ),
+            },
         }
 
     RETURN_TYPES = ("IMAGE", "MASK", "STRING")
@@ -108,8 +145,9 @@ class RobustMaskedColorMatch:
     FUNCTION = "match"
     CATEGORY = "RH-Nodes/color"
     DESCRIPTION = (
-        "用遮罩外的对应背景像素拟合鲁棒 RGB 仿射变换，再校正整张 target。"
-        "白色排除区不参与统计，但仍接受校色。reference 与 target 必须同尺寸、"
+        "用排除区之外的对应背景像素拟合鲁棒 RGB 仿射变换，再校正整张 target。"
+        "白色排除区不参与统计，但仍接受校色；输入带透明 alpha 时，"
+        "alpha<0.999 的像素自动并入排除区。reference 与 target 必须同尺寸、"
         "同位置；节点不做自动图像配准。"
     )
 
@@ -117,7 +155,7 @@ class RobustMaskedColorMatch:
         self,
         reference,
         target,
-        exclude_mask,
+        exclude_mask=None,
         strength=1.0,
         exclude_expand=32,
         mask_threshold=0.5,
@@ -128,23 +166,42 @@ class RobustMaskedColorMatch:
     ):
         reference = _images(reference, "reference")
         target = _images(target, "target")
-        mask = _masks(exclude_mask)
         batch = target.shape[0]
-        if reference.shape[1:] != target.shape[1:]:
+        if reference.shape[1:3] != target.shape[1:3]:
             raise ValueError(
-                "reference and target must have identical H,W,3 and corresponding "
+                "reference and target must have identical H,W and corresponding "
                 "content; resize/register explicitly"
             )
-        if reference.shape[0] not in (1, batch) or mask.shape[0] not in (1, batch):
+        if reference.shape[0] not in (1, batch):
             raise ValueError(
-                "reference/mask batch must be 1 (broadcast) or equal to target batch"
+                "reference batch must be 1 (broadcast) or equal to target batch"
             )
+        mask_provided = exclude_mask is not None
+        if mask_provided:
+            mask = _masks(exclude_mask)
+            if mask.shape[0] not in (1, batch):
+                raise ValueError(
+                    "mask batch must be 1 (broadcast) or equal to target batch"
+                )
+        else:
+            mask = torch.zeros((1, *target.shape[1:3]), dtype=torch.float32)
+        reference_alpha = _alpha_planes(reference)
+        target_alpha = _alpha_planes(target)
         outputs, regions, reports = [], [], []
         for index in range(batch):
+            target_frame = _frame(target, index)
+            alpha_valid = None
+            for planes in (reference_alpha, target_alpha):
+                if planes is None:
+                    continue
+                plane = planes[0 if planes.shape[0] == 1 else index]
+                valid = plane >= ALPHA_THRESHOLD
+                alpha_valid = valid if alpha_valid is None else (alpha_valid & valid)
             result, region, report = match_frame(
-                _frame(reference, index),
-                _frame(target, index),
+                _frame(reference, index)[..., :3],
+                target_frame[..., :3],
                 _frame(mask, index),
+                alpha_valid=alpha_valid,
                 strength=strength,
                 exclude_expand=exclude_expand,
                 mask_threshold=mask_threshold,
@@ -153,8 +210,16 @@ class RobustMaskedColorMatch:
                 iterations=iterations,
                 outlier_tolerance=outlier_tolerance,
             )
-            outputs.append(torch.from_numpy(result.astype(np.float32)))
+            frame = result
+            if target_frame.shape[-1] == 4:
+                frame = np.concatenate(
+                    [result, target_frame[..., 3:4]], axis=-1
+                )
+            outputs.append(torch.from_numpy(frame.astype(np.float32)))
             regions.append(torch.from_numpy(region))
+            report["exclusion_source"] = _exclusion_source(
+                mask_provided, report["alpha_excluded_pixels"]
+            )
             reports.append({"batch_index": index, **report})
             for warning in report["warnings"]:
                 logging.warning("[Robust Masked Color Match] %s", warning)

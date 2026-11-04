@@ -83,6 +83,7 @@ def match_frame(
     target,
     exclude_mask,
     *,
+    alpha_valid=None,
     strength=1.0,
     exclude_expand=32,
     mask_threshold=0.5,
@@ -111,7 +112,13 @@ def match_frame(
     h, w = target.shape[:2]
     mask, resized = prepare_mask(exclude_mask, h, w, mask_resize)
     binary = mask >= mask_threshold
+    if alpha_valid is not None:
+        alpha_valid = np.asarray(alpha_valid, dtype=bool)
+        if alpha_valid.shape != (h, w):
+            raise ValueError("alpha_valid must match the H,W of the image")
+        binary = binary | ~alpha_valid
     safe = outside_distance(binary) > exclude_expand
+    alpha_excluded = 0 if alpha_valid is None else int((~alpha_valid).sum())
     warnings = []
     if resized:
         warnings.append(
@@ -129,6 +136,7 @@ def match_frame(
         "strength": strength,
         "exclude_expand_px": exclude_expand,
         "mask_resized": resized,
+        "alpha_excluded_pixels": alpha_excluded,
         "safe_pixels": int(safe.sum()),
         "warnings": warnings,
     }
@@ -143,8 +151,9 @@ def match_frame(
     if safe.sum() < 100:
         raise ValueError(
             f"Only {safe.sum()} usable background pixels remain; need at least 100. "
-            "White means EXCLUDE. Check mask polarity, reduce exclude_expand, or "
-            "provide more shared background."
+            "White means EXCLUDE and transparent alpha is excluded too. Check mask "
+            "polarity and alpha coverage, reduce exclude_expand, or provide more "
+            "shared background."
         )
 
     y, x = np.indices((h, w))

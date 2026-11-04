@@ -117,6 +117,10 @@ V1 的 `component_internal_handoff` 与 `seam_handoff_smoothing` 默认关闭，
 
 `reference` 接希望保持颜色的原图，`target` 接尚未合成回原背景的 AI 编辑图，`exclude_mask` 中白色表示不参与颜色拟合的编辑区域。节点将同一个校色变换应用到完整 `target`，然后由下游节点决定合成范围。
 
+- `reference` 和 `target` 接受 RGB 或 RGBA；4 通道只取前 3 通道参与计算，`target` 为 RGBA 时输出保留其 alpha（原样复制）。
+- 输入带透明 alpha 时（`alpha < 0.999`），透明/半透明像素自动并入排除区、不参与拟合；`reference` 与 `target` 任一张透明都算。alpha 全不透明或没有 alpha 时行为与旧版完全一致。
+- `exclude_mask` 可省略（等价空遮罩）；此时只有 alpha 提供排除依据，两者都存在时取并集。排除区（含透明区）仍会按 `exclude_expand` 外扩，细长物体或文字建议减小该值。
+- `report` 新增 `alpha_excluded_pixels` 与 `exclusion_source`（`mask` / `alpha` / `mask+alpha` / `none`），便于确认拟合区来源。
 - `reference` 和 `target` 必须尺寸相同、内容位置对应；节点不自动配准图像。
 - `mask_resize=nearest` 只处理遮罩尺寸差异，不能修复平移、裁切或构图差异。
 - `exclude_expand` 默认 32；若遮罩已经由 OPR Large Object Mask 外扩，设为 0。
