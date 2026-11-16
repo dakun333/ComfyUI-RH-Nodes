@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+python_deps*/
+runtime/weights/
+runtime/vfms/
+runtime/.hf_cache/
+logs/
+.assets.lock
+.verified_assets.json
+*.partial
+*.tmp
+
+.deps.lock

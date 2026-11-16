@@ -93,10 +93,28 @@ try:
 except Exception as exc:
     _IMPORT_ERRORS.append(f"Shared Color Destripe: {exc}")
 
+try:
+    from .corridorkey2 import (
+        NODE_CLASS_MAPPINGS as _CORRIDORKEY_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _CORRIDORKEY_DISPLAY_MAPPINGS,
+    )
+    _register(_CORRIDORKEY_MAPPINGS, _CORRIDORKEY_DISPLAY_MAPPINGS)
+except Exception as exc:
+    _IMPORT_ERRORS.append(f"CorridorKey2: {exc}")
+
+try:
+    from .pure_light_matting import (
+        NODE_CLASS_MAPPINGS as _PURE_LIGHT_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _PURE_LIGHT_DISPLAY_MAPPINGS,
+    )
+    _register(_PURE_LIGHT_MAPPINGS, _PURE_LIGHT_DISPLAY_MAPPINGS)
+except Exception as exc:
+    _IMPORT_ERRORS.append(f"Pure Light Matting: {exc}")
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.7.1"
+__version__ = "1.8.0"

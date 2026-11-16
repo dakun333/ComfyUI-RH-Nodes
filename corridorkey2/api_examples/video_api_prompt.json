@@ -1,0 +1,86 @@
+{
+  "1": {
+    "class_type": "LoadVideo",
+    "inputs": {
+      "file": "CorridorKey2_install_test.mp4"
+    }
+  },
+  "2": {
+    "class_type": "GetVideoComponents",
+    "inputs": {
+      "video": [
+        "1",
+        0
+      ]
+    }
+  },
+  "3": {
+    "class_type": "ImageFromBatch",
+    "inputs": {
+      "image": [
+        "2",
+        0
+      ],
+      "batch_index": 0,
+      "length": 16
+    }
+  },
+  "4": {
+    "class_type": "CorridorKey2Matting",
+    "inputs": {
+      "images": [
+        "3",
+        0
+      ],
+      "fps": [
+        "2",
+        2
+      ],
+      "carry_hint": true,
+      "despill_strength": 0,
+      "low_vram": true,
+      "hann_chunk": 4,
+      "hann_stride": 2,
+      "model_scale": 1,
+      "seed": 0,
+      "hint_quality": 0.95,
+      "invert_hint_mask": false,
+      "temp_directory": ""
+    }
+  },
+  "5": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "4",
+        2
+      ],
+      "filename_prefix": "CorridorKey2/video_rgba"
+    }
+  },
+  "6": {
+    "class_type": "CreateVideo",
+    "inputs": {
+      "images": [
+        "4",
+        3
+      ],
+      "fps": [
+        "2",
+        2
+      ]
+    }
+  },
+  "7": {
+    "class_type": "SaveVideo",
+    "inputs": {
+      "video": [
+        "6",
+        0
+      ],
+      "filename_prefix": "CorridorKey2/checker_preview",
+      "format": "mp4",
+      "codec": "h264"
+    }
+  }
+}

@@ -1,0 +1,3 @@
+# No additional pip installation: uses ComfyUI's existing torch/numpy.
+# Native VIDEO uses ComfyUI's own comfy_api / PyAV.
+# No weights, worker, private dependency bundle, or CorridorKey runtime.

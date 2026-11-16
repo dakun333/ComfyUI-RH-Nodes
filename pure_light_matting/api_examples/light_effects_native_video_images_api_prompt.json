@@ -1,0 +1,42 @@
+{
+  "1": {
+    "class_type": "LoadVideo",
+    "inputs": {
+      "file": "fireworks.mp4"
+    }
+  },
+  "2": {
+    "class_type": "PureLightMatting",
+    "inputs": {
+      "video": [
+        "1",
+        0
+      ],
+      "black_threshold": 0,
+      "dither": 0,
+      "auto_background": true,
+      "processing_device": "auto",
+      "fps": 24,
+      "output_mode": "images"
+    }
+  },
+  "3": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "2",
+        2
+      ],
+      "filename_prefix": "CorridorKey2/light_effects_native_rgba"
+    }
+  },
+  "4": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "2",
+        3
+      ]
+    }
+  }
+}

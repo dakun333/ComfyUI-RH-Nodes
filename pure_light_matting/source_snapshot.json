@@ -1,0 +1,25 @@
+{
+  "source": "ComfyUI-PureLightMatting",
+  "snapshot_date": "2026-11-16",
+  "files_sha256": {
+    ".gitignore": "b59d24fa8f0b71255b6c00e6dad96aa646e18b50ce3d8ba153034f0ec0fb4b1f",
+    "LIGHT_EFFECTS.md": "7152231df8e1cbd179841a305ab1ab35b224226babffa8631aad13d66ae5ad39",
+    "light_effects.py": "fce4404af3ea44a8cdc5bdb11a036f158fd58568199b072d377f72b678c3bd54",
+    "LIGHT_EFFECTS_SOURCE.md": "7cac8673c24353ca3be4f80a859d945ecee3aefdf1e7f200cce85368da23cae2",
+    "light_unmult.py": "2100fb397d3ca1ff571e848619a2dcf00706b4591392ac5d69f098e1958d5e41",
+    "README.md": "adf1529d65ccbd338cd046642412f084ef95316ff6345ab04027b05c9063d6fc",
+    "requirements.txt": "ecffcaf1bddd4bcd8abd58ab7afaf39e820b8fb62f5e0bebc9da5ac4c230eef6",
+    "THIRD_PARTY_NOTICES.md": "d32dc06bf5d45cb673d57ae5ae7d7a560ca9d4fe7ed59956b1104cee2403fc5f",
+    "video_io.py": "167f1211f5b2477664c007ccee4fa9ac9730b47af33dad86b0eb98cfb5e6b89d",
+    "VIDEO_IO_MODES.md": "2882b17f91aba2453aaeb1279aea9a105082dc9b3ace34925d79dea7583660ec",
+    "__init__.py": "fb75f791f0b907c0cf14d0d093423940707e2cce275a042718c435bb6e4282bf",
+    "api_examples/light_effects_image_api_prompt.json": "ef98b94537f5e6127236a2fd1c39ce29e1ad56d2cafc2c7026c7d4def129ab6d",
+    "api_examples/light_effects_native_video_images_api_prompt.json": "c94a2275e52909ee87e46df496f3cd2450bf5ff865924c530fd8c3abc85e38b5",
+    "api_examples/light_effects_native_video_video_api_prompt.json": "1550d6628457ef9dedb9e40cdb68c48f2ca48c5ea26069e0e83551f41a1ff1e5",
+    "api_examples/light_effects_video_api_prompt.json": "cebc42e5a02fd2f2d6b56e8533211de8d435c01c52fcf429f8e60f08f100f6e2",
+    "example_workflows/light_effects_image_workflow.json": "1d3838b1801bfb690ff36c47db426710015c172f6b84a1c43df737d38597b5cb",
+    "example_workflows/light_effects_native_video_images_workflow.json": "23d76b073d2350a709d6c20c617e7053b827d3b40fbf02127a81701390b32ea7",
+    "example_workflows/light_effects_native_video_video_workflow.json": "3ee9994f5f370b39c62a07e1388fb76f9ed449a45f9be0c44acb8ffc0ea4a248",
+    "example_workflows/light_effects_video_workflow.json": "0c48d44366d16603310e681023aa3e12cba30fc56dfd8d28d826fad6fc1a84c2"
+  }
+}
