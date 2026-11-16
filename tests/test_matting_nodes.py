@@ -33,9 +33,20 @@ class MattingTests(unittest.TestCase):
         class Blocker:
             def __init__(self, message): self.message = message
         graph.ExecutionBlocker = Blocker
-        modules = patch.dict(sys.modules, {'comfy': comfy, 'comfy.model_management': self.mm,
-                            'comfy.utils': utils, 'comfy_execution.graph_utils': graph})
-        modules.start(); self.addCleanup(modules.stop)
+        # patch.dict(sys.modules) restores the entire dictionary on exit, also
+        # removing unrelated modules lazily imported by torch.testing. Their
+        # C++ operator registrations survive, so reimporting them fails.
+        missing = object()
+        for name, module in {'comfy': comfy, 'comfy.model_management': self.mm,
+                             'comfy.utils': utils, 'comfy_execution.graph_utils': graph}.items():
+            previous = sys.modules.get(name, missing)
+            def restore(name=name, previous=previous):
+                if previous is missing:
+                    sys.modules.pop(name, None)
+                else:
+                    sys.modules[name] = previous
+            self.addCleanup(restore)
+            sys.modules[name] = module
 
     def test_schema_defaults_and_registration(self):
         for node_id in ('CorridorKey2Matting', 'PureLightMatting'):
@@ -122,3 +133,26 @@ class MattingTests(unittest.TestCase):
             self.assertEqual(command[:3], [sys.executable, '-I', '-u'])
             self.assertIn('--if-needed', command)
             self.assertNotIn('PYTHONPATH', run.call_args.kwargs['env'])
+
+
+class MattingModuleIsolationTests(unittest.TestCase):
+    def test_cleanup_preserves_lazy_imports_and_restores_only_comfy_stubs(self):
+        name = '_rh_matting_lazy_import_regression'
+        original_comfy = sys.modules.get('comfy')
+        had_comfy = 'comfy' in sys.modules
+        fixture = MattingTests('test_schema_defaults_and_registration')
+        fixture.setUp()
+        lazy_module = types.ModuleType(name)
+        try:
+            sys.modules[name] = lazy_module
+            # Exercise the actual lazy DTensor imports used in failing CI.
+            torch.testing.assert_close(torch.ones(1), torch.ones(1))
+            fixture.doCleanups()
+            self.assertIs(sys.modules.get(name), lazy_module)
+            self.assertEqual('comfy' in sys.modules, had_comfy)
+            if had_comfy:
+                self.assertIs(sys.modules['comfy'], original_comfy)
+            torch.testing.assert_close(torch.ones(1), torch.ones(1))
+        finally:
+            fixture.doCleanups()
+            sys.modules.pop(name, None)
