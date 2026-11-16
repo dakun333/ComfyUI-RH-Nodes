@@ -6,13 +6,13 @@
 - 不包含/依赖 CorridorKey、私有 Python 依赖或独立worker。
 - 使用已有 ComfyUI 的 torch/numpy，CPU/GPU均可运行，不改变全局依赖。
 - 节点显示名：**纯光效去背**；类别：`RH-Nodes/matting`。
-- 内部ID继续使用 `CorridorKey2LightEffectsMatting`，仅为旧工作流兼容，与原AI节点包无运行依赖。
+- 类名及注册 ID：`PureLightMatting`，独立纯光效算法。
 
 ## 安装
 
 安装 RH-nodes 后本模块从 `pure_light_matting/` 注册，重启 ComfyUI即可。不需要下载权重或执行私有依赖安装脚本。VIDEO功能要求支持原生VIDEO API的ComfyUI；源包记录的验证环境为ComfyUI0.24.0。
 
-本次从 `ComfyUI-CorridorKey2` 移出光效注册，因此两包同时安装不会重复注册。不要另装包含同一历史节点ID的旧版本包。
+旧版独立包使用的 `CorridorKey2LightEffectsMatting` 已改为 `PureLightMatting`。旧工作流需重新添加“纯光效去背”节点并接回输入输出；附带示例已更新。
 
 ## 用途
 

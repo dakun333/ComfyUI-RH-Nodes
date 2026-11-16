@@ -6,7 +6,7 @@
     }
   },
   "2": {
-    "class_type": "CorridorKey2LightEffectsMatting",
+    "class_type": "PureLightMatting",
     "inputs": {
       "images": [
         "1",

@@ -19,7 +19,7 @@ class MattingTests(unittest.TestCase):
     def setUpClass(cls):
         cls.package = load_package()
         cls.ck = importlib.import_module(cls.package.__name__ + '.corridorkey2.nodes')
-        cls.light = cls.package.NODE_CLASS_MAPPINGS['CorridorKey2LightEffectsMatting']
+        cls.light = cls.package.NODE_CLASS_MAPPINGS['PureLightMatting']
 
     def setUp(self):
         self.mm = types.ModuleType('comfy.model_management')
@@ -38,7 +38,7 @@ class MattingTests(unittest.TestCase):
         modules.start(); self.addCleanup(modules.stop)
 
     def test_schema_defaults_and_registration(self):
-        for node_id in ('CorridorKey2Matting', 'CorridorKey2LightEffectsMatting'):
+        for node_id in ('CorridorKey2Matting', 'PureLightMatting'):
             cls = self.package.NODE_CLASS_MAPPINGS[node_id]
             self.assertEqual(cls.CATEGORY, 'RH-Nodes/matting')
             self.assertEqual(cls.RETURN_TYPES, ('IMAGE', 'MASK', 'IMAGE', 'IMAGE', 'STRING', 'VIDEO'))
@@ -108,7 +108,7 @@ class MattingTests(unittest.TestCase):
         with patch('subprocess.Popen', side_effect=AssertionError('worker on import')), patch('subprocess.run', side_effect=AssertionError('installer on import')):
             package = load_package()
         self.assertIn('CorridorKey2Matting', package.NODE_CLASS_MAPPINGS)
-        self.assertIn('CorridorKey2LightEffectsMatting', package.NODE_CLASS_MAPPINGS)
+        self.assertIn('PureLightMatting', package.NODE_CLASS_MAPPINGS)
 
     def test_bootstrap_ready_skips_pip_and_missing_uses_isolated_worker(self):
         import os

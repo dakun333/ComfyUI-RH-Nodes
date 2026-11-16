@@ -1,6 +1,6 @@
 # 纯光效去背原生 VIDEO 输入与互斥输出（2026-11-13）
 
-适用节点：独立 `ComfyUI-PureLightMatting` 包的 `CorridorKey2LightEffectsMatting`（兼容历史节点ID）。节点ID不变，原有输出0–4位置不变，新增第5号（第六个）`video`输出。
+适用节点：`PureLightMatting`（纯光效去背）。原有输出0–4位置不变，第5号（第六个）为 `video` 输出。
 
 ## 输入
 

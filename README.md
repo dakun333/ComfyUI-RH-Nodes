@@ -255,10 +255,10 @@ Load Image.MASK  → 共享颜色宽带去竖纹.mask
 
 ## CorridorKey2 / 纯光效去背（1.8.0）
 
-新增两个节点，均分类 `RH-Nodes/matting`，既有 ID、参数默认及六个输出顺序保留：`foreground_rgb / alpha / rgba / checker_preview / report / video`。Alpha 为 1前景、0透明，RGB 为 straight/未预乘。
+新增两个独立节点，均分类 `RH-Nodes/matting`，参数默认及六个输出顺序保留：`foreground_rgb / alpha / rgba / checker_preview / report / video`。Alpha 为 1前景、0透明，RGB 为 straight/未预乘。纯光效节点类名和 ID 为 `PureLightMatting`，旧版光效节点需重新添加并接线，附带示例已更新。
 
 - **纯色底去背**（`CorridorKey2Matting`）：CorridorKey 2.0 模型，支持 IMAGE 帧批次或原生 VIDEO 二选一。第一次实际执行自动安装模块内私有依赖并下载约 5.08GB 固定模型，启动扫描不安装。需要 Windows x64、CPython3.12、NVIDIA CUDA 和可用的宿主 torch/torchvision、pip、Git、网络。不会升级宿主 NumPy/Transformers/torch。固定模型代码提交及权重哈希保留在 `corridorkey2/assets_manifest.json`。详细安装、参数及限制见 [安装说明](corridorkey2/INSTALL.zh-CN.md) 和 [VIDEO说明](corridorkey2/VIDEO_IO_MODES.md)。
-- **纯光效去背**（`CorridorKey2LightEffectsMatting`）：无模型、无下载的原创 Auto Q / UnMult 光效算法，仅用于黑/近黑均匀底烟花、火花、辉光等。无需 Mask，CPU/GPU 逐帧处理。auto_background 默认开启；纯黑源可关闭固定 B=0，避免底色估计跳变。black_threshold 默认0（0–255）、dither 默认0（0–1），提高黑点会丢弱光；白底补偿为估计。人物及实心物体请使用适当的模型节点。详见 [用途及参数](pure_light_matting/README.md) 和 [数学说明](pure_light_matting/LIGHT_EFFECTS.md)。
+- **纯光效去背**（`PureLightMatting`）：无模型、无下载的原创 Auto Q / UnMult 光效算法，仅用于黑/近黑均匀底烟花、火花、辉光等。无需 Mask，CPU/GPU 逐帧处理。auto_background 默认开启；纯黑源可关闭固定 B=0，避免底色估计跳变。black_threshold 默认0（0–255）、dither 默认0（0–1），提高黑点会丢弱光；白底补偿为估计。人物及实心物体请使用适当的模型节点。详见 [用途及参数](pure_light_matting/README.md) 和 [数学说明](pure_light_matting/LIGHT_EFFECTS.md)。
 
 两者 output_mode 默认 images，video 模式仅生成 RGBA VIDEO 和报告，不分配全批 RGB/Mask/棋盘副本；未选输出分支使用 ExecutionBlocker。VIDEO 保留源帧率、音频及元数据，IMAGE→VIDEO 使用 fps（默认24）。原生 VIDEO 要求支持相应 ComfyUI API。并非流式解码，长视频仍需要输入和结果内存、CorridorKey 还需临时磁盘。
 

@@ -60,7 +60,7 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "SeedreamV64LoadAlignedLayers",
                 "SharedColorBroadbandDestripe",
                 "CorridorKey2Matting",
-                "CorridorKey2LightEffectsMatting",
+                "PureLightMatting",
             },
         )
 

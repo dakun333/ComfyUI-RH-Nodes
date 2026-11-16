@@ -46,6 +46,6 @@
 | `seedream_color_reuse/` | `SeedreamLayerColorReuseV64`、`SeedreamLayerColorReuseV64Fast`、`SeedreamV64LoadAlignedLayers` |
 | `shared_color_destripe/` | `SharedColorBroadbandDestripe` |
 | `corridorkey2/` | `CorridorKey2Matting` |
-| `pure_light_matting/` | `CorridorKey2LightEffectsMatting` |
+| `pure_light_matting/` | `PureLightMatting` |
 
 CorridorKey2 为独立非 MIT 许可模块：保留其原许可证、第三方声明和发布授权记录；私有依赖及模型仅在实际执行时由隔离 worker 安装/下载，不能合入全局 requirements.txt，也不能在节点扫描时启动安装。

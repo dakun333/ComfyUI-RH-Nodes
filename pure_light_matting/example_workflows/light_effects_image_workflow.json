@@ -43,7 +43,7 @@
     },
     {
       "id": 2,
-      "type": "CorridorKey2LightEffectsMatting",
+      "type": "PureLightMatting",
       "pos": [
         420,
         100
@@ -110,7 +110,7 @@
         }
       ],
       "properties": {
-        "Node name for S&R": "CorridorKey2LightEffectsMatting"
+        "Node name for S&R": "PureLightMatting"
       },
       "widgets_values": [
         0,

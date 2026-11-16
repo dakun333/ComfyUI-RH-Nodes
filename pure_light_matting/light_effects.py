@@ -46,7 +46,7 @@ def validate_light_inputs(images, black_threshold, dither, auto_background, proc
         raise ValueError("processing_device must be 'auto' or 'cpu'")
 
 
-class CorridorKey2LightEffectsMatting:
+class PureLightMatting:
     @classmethod
     def INPUT_TYPES(cls):
         return {"required": {

@@ -60,7 +60,7 @@ def main():
             "SeedreamV64LoadAlignedLayers",
             "SharedColorBroadbandDestripe",
             "CorridorKey2Matting",
-            "CorridorKey2LightEffectsMatting",
+            "PureLightMatting",
         }
         registered = set(package.NODE_CLASS_MAPPINGS)
         if not expected <= registered:
@@ -72,7 +72,7 @@ def main():
         import folder_paths
         import torch
 
-        light = package.NODE_CLASS_MAPPINGS["CorridorKey2LightEffectsMatting"]()
+        light = package.NODE_CLASS_MAPPINGS["PureLightMatting"]()
         glow = torch.zeros(2, 16, 24, 3)
         glow[:, 4:12, 6:18] = torch.tensor([.04, .2, .08])
         result = light.matte(glow, auto_background=False, processing_device="cpu")

@@ -2,7 +2,7 @@
 
 节点包：`ComfyUI-PureLightMatting`。类别：`video/matting`。
 显示名：**纯光效去背**。
-节点 ID：`CorridorKey2LightEffectsMatting`。
+节点 ID：`PureLightMatting`。
 
 这是用户本地 Mekajiki UnMult / Auto Background 的 **Auto Q 无 Mask 光效分支**，不是 CorridorKey 深度模型，不加载任何权重。只复制必要的 PyTorch 数学核心，运行不依赖原工作目录、AE 或 .aex 二进制。不导入、不依赖、也不调用 `ComfyUI-CorridorKey2`。保留历史节点ID只用于旧工作流兼容。
 
