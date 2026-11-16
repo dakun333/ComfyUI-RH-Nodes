@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-rh-nodes"
-version = "1.7.1"
+version = "1.8.0"
 description = "A maintained ComfyUI image-node collection with restoration, matting, color matching, outlines, and BBOX tools."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,7 +28,7 @@ Icon = ""
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools]
-license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "corridorkey2/LICENSE", "corridorkey2/runtime/LICENSE", "corridorkey2/runtime/third_party/MoGe/LICENSE"]
 include-package-data = false
 packages = [
   "comfyui_rh_nodes",
@@ -38,6 +38,8 @@ packages = [
   "comfyui_rh_nodes.seedream_color_reuse",
   "comfyui_rh_nodes.seedream_color_reuse.engine",
   "comfyui_rh_nodes.shared_color_destripe",
+  "comfyui_rh_nodes.corridorkey2",
+  "comfyui_rh_nodes.pure_light_matting",
 ]
 
 [tool.setuptools.package-dir]
@@ -48,9 +50,13 @@ comfyui_rh_nodes = "."
 "comfyui_rh_nodes.seedream_color_reuse" = "seedream_color_reuse"
 "comfyui_rh_nodes.seedream_color_reuse.engine" = "seedream_color_reuse/engine"
 "comfyui_rh_nodes.shared_color_destripe" = "shared_color_destripe"
+"comfyui_rh_nodes.corridorkey2" = "corridorkey2"
+"comfyui_rh_nodes.pure_light_matting" = "pure_light_matting"
 
 [tool.setuptools.package-data]
 "comfyui_rh_nodes.seedream_color_reuse" = ["core_provenance.json", "examples/*.json"]
+"comfyui_rh_nodes.corridorkey2" = ["*.json", "*.txt", "*.md", "*.ps1", "LICENSE", "runtime/**/*.py", "runtime/**/LICENSE", "runtime/*.md", "runtime/third_party/MoGe/*.md", "api_examples/*.json", "example_workflows/*.json"]
+"comfyui_rh_nodes.pure_light_matting" = ["*.json", "*.md", "api_examples/*.json", "example_workflows/*.json"]
 
 [tool.setuptools.exclude-package-data]
 "*" = ["*.pyc", "*.pyo", "__pycache__/*"]

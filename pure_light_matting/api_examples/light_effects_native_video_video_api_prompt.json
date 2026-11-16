@@ -1,0 +1,48 @@
+{
+  "1": {
+    "class_type": "LoadVideo",
+    "inputs": {
+      "file": "fireworks.mp4"
+    }
+  },
+  "2": {
+    "class_type": "CorridorKey2LightEffectsMatting",
+    "inputs": {
+      "video": [
+        "1",
+        0
+      ],
+      "black_threshold": 0,
+      "dither": 0,
+      "auto_background": true,
+      "processing_device": "auto",
+      "fps": 24,
+      "output_mode": "video"
+    }
+  },
+  "3": {
+    "class_type": "GetVideoComponents",
+    "inputs": {
+      "video": [
+        "2",
+        5
+      ]
+    }
+  },
+  "4": {
+    "class_type": "SaveWEBM",
+    "inputs": {
+      "images": [
+        "3",
+        0
+      ],
+      "fps": [
+        "3",
+        2
+      ],
+      "filename_prefix": "CorridorKey2/light_effects_transparent",
+      "codec": "vp9",
+      "crf": 18
+    }
+  }
+}

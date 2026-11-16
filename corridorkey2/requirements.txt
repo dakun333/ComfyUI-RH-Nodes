@@ -1,0 +1,2 @@
+# No global pip changes. Private deps install automatically on first actual node execution.
+# Optional manual fallback: ComfyUI Python install.py

@@ -59,6 +59,8 @@ def main():
             "SeedreamLayerColorReuseV64Fast",
             "SeedreamV64LoadAlignedLayers",
             "SharedColorBroadbandDestripe",
+            "CorridorKey2Matting",
+            "CorridorKey2LightEffectsMatting",
         }
         registered = set(package.NODE_CLASS_MAPPINGS)
         if not expected <= registered:
@@ -69,6 +71,22 @@ def main():
 
         import folder_paths
         import torch
+
+        light = package.NODE_CLASS_MAPPINGS["CorridorKey2LightEffectsMatting"]()
+        glow = torch.zeros(2, 16, 24, 3)
+        glow[:, 4:12, 6:18] = torch.tensor([.04, .2, .08])
+        result = light.matte(glow, auto_background=False, processing_device="cpu")
+        torch.testing.assert_close(result[0] * result[1][..., None], glow)
+        from comfy_api.latest import Types, InputImpl
+        from fractions import Fraction
+        source_video = InputImpl.VideoFromComponents(Types.VideoComponents(
+            images=glow, frame_rate=Fraction(30000, 1001), metadata={"test": "matting"}))
+        video_result = light.matte(video=source_video, output_mode="video", auto_background=False, processing_device="cpu")
+        video_components = video_result[5].get_components()
+        if video_components.frame_rate != Fraction(30000, 1001) or video_components.images.shape != (2, 16, 24, 4):
+            raise RuntimeError("Pure-light VIDEO lost frame rate or RGBA")
+        if not torch.equal(video_components.alpha, video_components.images[..., 3]):
+            raise RuntimeError("Pure-light VIDEO alpha differs from RGBA")
 
         input_directory = work / "input"
         output_directory = work / "output"

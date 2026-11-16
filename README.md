@@ -253,6 +253,23 @@ Load Image.MASK  → 共享颜色宽带去竖纹.mask
 
 源节点包含2026-10-23自动尺度、2026-10-28近白证据和2026-10-29透明底更新；来源为未独立 Git 跟踪的本地插件文件快照。节点、核心及尺度估计由贡献者确认为原创并授权 MIT 发布。严格历史模式需同时关闭 `auto_scale` 与 `include_near_white`，使用历史手动尺度。迁移时停用独立目录 `ComfyUI-Shared-Color-Destripe`，避免相同 ID 重复加载。
 
+## CorridorKey2 / 纯光效去背（1.8.0）
+
+新增两个节点，均分类 `RH-Nodes/matting`，既有 ID、参数默认及六个输出顺序保留：`foreground_rgb / alpha / rgba / checker_preview / report / video`。Alpha 为 1前景、0透明，RGB 为 straight/未预乘。
+
+- **纯色底去背**（`CorridorKey2Matting`）：CorridorKey 2.0 模型，支持 IMAGE 帧批次或原生 VIDEO 二选一。第一次实际执行自动安装模块内私有依赖并下载约 5.08GB 固定模型，启动扫描不安装。需要 Windows x64、CPython3.12、NVIDIA CUDA 和可用的宿主 torch/torchvision、pip、Git、网络。不会升级宿主 NumPy/Transformers/torch。固定模型代码提交及权重哈希保留在 `corridorkey2/assets_manifest.json`。详细安装、参数及限制见 [安装说明](corridorkey2/INSTALL.zh-CN.md) 和 [VIDEO说明](corridorkey2/VIDEO_IO_MODES.md)。
+- **纯光效去背**（`CorridorKey2LightEffectsMatting`）：无模型、无下载的原创 Auto Q / UnMult 光效算法，仅用于黑/近黑均匀底烟花、火花、辉光等。无需 Mask，CPU/GPU 逐帧处理。auto_background 默认开启；纯黑源可关闭固定 B=0，避免底色估计跳变。black_threshold 默认0（0–255）、dither 默认0（0–1），提高黑点会丢弱光；白底补偿为估计。人物及实心物体请使用适当的模型节点。详见 [用途及参数](pure_light_matting/README.md) 和 [数学说明](pure_light_matting/LIGHT_EFFECTS.md)。
+
+两者 output_mode 默认 images，video 模式仅生成 RGBA VIDEO 和报告，不分配全批 RGB/Mask/棋盘副本；未选输出分支使用 ExecutionBlocker。VIDEO 保留源帧率、音频及元数据，IMAGE→VIDEO 使用 fps（默认24）。原生 VIDEO 要求支持相应 ComfyUI API。并非流式解码，长视频仍需要输入和结果内存、CorridorKey 还需临时磁盘。
+
+透明 PNG：rgba → Save Image。透明视频：video → GetVideoComponents → SaveWEBM（vp9）；MP4/H264 无 Alpha。该内置 WebM 工作流不保存音频，VIDEO 对象本身保留音频。工作流在两模块的 example_workflows/，导入后选择自己的素材。
+
+PureLightMatting 由贡献者确认原创及公开发布权，授权 MIT。CorridorKey2 的集成和重新分发授权由贡献者确认，其代码仍为 Corridor Key Licence，原许可证与第三方声明保留；根 MIT 不覆盖它。详见 [第三方声明](THIRD_PARTY_NOTICES.md)。源码为2026-11-16本地文件快照，原文件哈希在各模块 source_snapshot.json。
+
+同一 ComfyUI 中启用独立旧插件与统一节点会重复注册相同 ID，迁移时将对应独立插件移至 custom_nodes 外备份再重启。
+
+本次验证：真实 ComfyUI 注册24节点；纯光效 IMAGE/原生 VIDEO、Alpha 与帧率保留通过；CorridorKey2 使用现有已验证私有依赖和权重的临时副本，完成256×256单帧 CUDA 推理（float32 RGBA）。干净机器首次 pip 安装和网络权重下载未做端到端验证；引导、下载校验、失败恢复由单元测试覆盖。
+
 ## 验证
 
 使用 ComfyUI 的 Python 并在仓库目录运行：
