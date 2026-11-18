@@ -1,3 +1,4 @@
 # Preserve upstream snapshot formatting while checking integration code normally.
 corridorkey2/runtime/** whitespace=-blank-at-eol,-blank-at-eof
 pure_light_matting/light_unmult.py whitespace=-blank-at-eof
+y367_destripe/guarded_runtime/** whitespace=-blank-at-eof

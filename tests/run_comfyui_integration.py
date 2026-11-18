@@ -61,6 +61,10 @@ def main():
             "SharedColorBroadbandDestripe",
             "CorridorKey2Matting",
             "PureLightMatting",
+            "Y367CF1Destripe",
+            "Y367CE4Destripe",
+            "Y367CF1ProtectedDestripe",
+            "Y367CE4ProtectedDestripe",
         }
         registered = set(package.NODE_CLASS_MAPPINGS)
         if not expected <= registered:
@@ -71,6 +75,22 @@ def main():
 
         import folder_paths
         import torch
+
+        yy, xx = np.mgrid[:160, :192]
+        direction = np.array([.3, -.6, .8]); direction /= np.linalg.norm(direction)
+        waves = np.cos(2*np.pi*48*xx/192) + .7*np.cos(2*np.pi*48*yy/160)
+        stripes = torch.from_numpy(np.rint(150 + 3.5*waves[..., None]*direction).astype(np.float32)/255)[None]
+        for node_id in ("Y367CF1Destripe", "Y367CE4Destripe", "Y367CF1ProtectedDestripe", "Y367CE4ProtectedDestripe"):
+            cls = package.NODE_CLASS_MAPPINGS[node_id]
+            if "Protected" in node_id:
+                schema = cls.define_schema()
+                if schema.category != "RH-Nodes/restore" or len(schema.outputs) != 3:
+                    raise RuntimeError("Y367 V3 schema changed")
+                y367_result = cls.execute(stripes, orientation="both").result
+            else:
+                y367_result = cls().process(stripes, orientation="both")
+            if y367_result[0].shape != stripes.shape or not torch.isfinite(y367_result[0]).all():
+                raise RuntimeError("Y367 returned invalid output")
 
         light = package.NODE_CLASS_MAPPINGS["PureLightMatting"]()
         glow = torch.zeros(2, 16, 24, 3)
@@ -192,7 +212,8 @@ def main():
         print(
             json.dumps(
                 {"registered_nodes": len(registered), "output_written": True,
-                 "standard_transparent_png_roundtrip": True}
+                 "standard_transparent_png_roundtrip": True,
+                 "y367_four_nodes_executed": True}
             )
         )
 

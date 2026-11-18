@@ -111,10 +111,19 @@ try:
 except Exception as exc:
     _IMPORT_ERRORS.append(f"Pure Light Matting: {exc}")
 
+try:
+    from .y367_destripe import (
+        NODE_CLASS_MAPPINGS as _Y367_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _Y367_DISPLAY_MAPPINGS,
+    )
+    _register(_Y367_MAPPINGS, _Y367_DISPLAY_MAPPINGS)
+except Exception as exc:
+    _IMPORT_ERRORS.append(f"Y367 Destripe: {exc}")
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.8.0"
+__version__ = "1.9.0"
