@@ -34,6 +34,13 @@ class NodeCollectionSmokeTests(unittest.TestCase):
         cls.torch = torch
 
     def test_registers_all_node_families(self):
+        y367_ids = {"Y367CF1Destripe", "Y367CE4Destripe"}
+        try:
+            from comfy_api.latest import io
+        except ImportError:
+            pass
+        else:
+            y367_ids.update({"Y367CF1ProtectedDestripe", "Y367CE4ProtectedDestripe"})
         self.assertEqual(
             set(self.package.NODE_CLASS_MAPPINGS),
             {
@@ -61,7 +68,7 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "SharedColorBroadbandDestripe",
                 "CorridorKey2Matting",
                 "PureLightMatting",
-            },
+            } | y367_ids,
         )
 
     def test_comic_outline_preserves_batch_shape(self):

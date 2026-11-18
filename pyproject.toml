@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-rh-nodes"
-version = "1.8.0"
+version = "1.9.0"
 description = "A maintained ComfyUI image-node collection with restoration, matting, color matching, outlines, and BBOX tools."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -40,6 +40,8 @@ packages = [
   "comfyui_rh_nodes.shared_color_destripe",
   "comfyui_rh_nodes.corridorkey2",
   "comfyui_rh_nodes.pure_light_matting",
+  "comfyui_rh_nodes.y367_destripe",
+  "comfyui_rh_nodes.y367_destripe.guarded_runtime",
 ]
 
 [tool.setuptools.package-dir]
@@ -52,11 +54,15 @@ comfyui_rh_nodes = "."
 "comfyui_rh_nodes.shared_color_destripe" = "shared_color_destripe"
 "comfyui_rh_nodes.corridorkey2" = "corridorkey2"
 "comfyui_rh_nodes.pure_light_matting" = "pure_light_matting"
+"comfyui_rh_nodes.y367_destripe" = "y367_destripe"
+"comfyui_rh_nodes.y367_destripe.guarded_runtime" = "y367_destripe/guarded_runtime"
 
 [tool.setuptools.package-data]
 "comfyui_rh_nodes.seedream_color_reuse" = ["core_provenance.json", "examples/*.json"]
 "comfyui_rh_nodes.corridorkey2" = ["*.json", "*.txt", "*.md", "*.ps1", "LICENSE", "runtime/**/*.py", "runtime/**/LICENSE", "runtime/*.md", "runtime/third_party/MoGe/*.md", "api_examples/*.json", "example_workflows/*.json"]
 "comfyui_rh_nodes.pure_light_matting" = ["*.json", "*.md", "api_examples/*.json", "example_workflows/*.json"]
+"comfyui_rh_nodes.y367_destripe" = ["source_snapshot.json", "README.md", "examples/*.json"]
+"comfyui_rh_nodes.y367_destripe.guarded_runtime" = ["model.npz"]
 
 [tool.setuptools.exclude-package-data]
 "*" = ["*.pyc", "*.pyo", "__pycache__/*"]

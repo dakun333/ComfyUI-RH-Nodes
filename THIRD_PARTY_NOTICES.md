@@ -1,5 +1,9 @@
 # Third-Party Notices
 
+## Y367 去纹（1.9.0）
+
+`y367_destripe/` 来自贡献者的 Y367-FAST 2026-11-18 本地文件快照。贡献者已确认算法、封装及 CNN 权重均为原创并授权按根 MIT 许可证公开发布。模型随包提供，SHA-256：`32c4375a718762bec6352c12f320d3f760a04cc03a8b39ba46f2d09967870268`；原文件哈希见 `source_snapshot.json`。Numba（BSD-2-Clause）、llvmlite（BSD-style / LLVM）、threadpoolctl（BSD-3-Clause）及 NumPy/SciPy/OpenCV/Pillow 保留各自许可证，不作为本仓库源码授权。
+
 This repository contains MIT-licensed project source code and the separately
 licensed CorridorKey2 module described below. It declares external
 Python packages in `requirements.txt`. Those packages are installed separately
