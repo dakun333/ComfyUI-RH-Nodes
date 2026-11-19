@@ -1,11 +1,10 @@
-"""CE4 / CF1 and their ST1 + PO1 protection variants."""
-from .guarded_nodes import NODE_CLASS_MAPPINGS as GUARDED_CLASSES, NODE_DISPLAY_NAME_MAPPINGS as GUARDED_NAMES
-NODE_CLASS_MAPPINGS = dict(GUARDED_CLASSES)
-NODE_DISPLAY_NAME_MAPPINGS = dict(GUARDED_NAMES)
+"""CF1 with ST1 + PO1 abnormal-correction protection."""
+NODE_CLASS_MAPPINGS = {}
+NODE_DISPLAY_NAME_MAPPINGS = {}
 try:
     from .protected_nodes import NODE_CLASS_MAPPINGS as PROTECTED_CLASSES, NODE_DISPLAY_NAME_MAPPINGS as PROTECTED_NAMES
 except ImportError as exc:
-    print(f"[RH Nodes] Y367 ST1/PO1 nodes require ComfyUI V3 API: {exc}")
+    print(f"[RH Nodes] Y367 CF1 protection requires ComfyUI V3 API: {exc}")
 else:
     NODE_CLASS_MAPPINGS.update(PROTECTED_CLASSES)
     NODE_DISPLAY_NAME_MAPPINGS.update(PROTECTED_NAMES)

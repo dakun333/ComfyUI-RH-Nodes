@@ -5,7 +5,7 @@ import hashlib, sys, threading, time
 import cv2, numba, PIL, scipy
 import numpy as np
 from .engine import MODEL_SHA256, FIXED_CYCLES, inference_threads
-from .guarded_runtime import contour_edge, edge_output, envelope, protected_outlier
+from .guarded_runtime import envelope, protected_outlier
 from .guarded_runtime.chroma_guard import admission_mask
 MODEL = Path(__file__).parent / "guarded_runtime" / "model.npz"
 
@@ -87,7 +87,6 @@ def _validated_inference_schedule(report, orientation, count):
 
 
 def _in_process_frame(rgb, alpha, orientation, variant):
-    operator = edge_output.process if variant == "CE4" else contour_edge.process
     counter_lock = threading.Lock()
     count = 0
     with inference_threads(), _cpu4_threads(orientation):
@@ -107,13 +106,9 @@ def _in_process_frame(rgb, alpha, orientation, variant):
         envelope.infer_numpy = counted_infer
         started = time.perf_counter()
         try:
-            if variant.endswith("_PO1"):
-                target, eight, report = protected_outlier.process(
-                    rgb, alpha, method=variant.split("_")[0], variant="PO1",
-                    orientation=orientation, keep_edge_protection=False)
-            else:
-                target, eight, report = operator(
-                    rgb, alpha, orientation=orientation, keep_edge_protection=False)
+            target, eight, report = protected_outlier.process(
+                rgb, alpha, method="CF1", variant="PO1",
+                orientation=orientation, keep_edge_protection=False)
             _interrupt()
         finally:
             envelope.infer_numpy = original_infer
@@ -125,7 +120,7 @@ def _in_process_frame(rgb, alpha, orientation, variant):
 
 def run_guarded_frame(rgb, alpha, orientation, *, variant):
     started = time.perf_counter()
-    if variant not in ("CE4", "CF1", "CE4_PO1", "CF1_PO1"):
+    if variant != "CF1_PO1":
         raise ValueError("Unknown Y367-FAST guarded variant")
     if orientation not in ("vertical", "horizontal", "both"):
         raise ValueError("Unknown Y367-FAST orientation")

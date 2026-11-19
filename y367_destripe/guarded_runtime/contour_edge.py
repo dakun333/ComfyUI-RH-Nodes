@@ -8,8 +8,8 @@ import os
 import time
 import cv2,numpy as np
 from . import chroma_guard as cg
-from . import edge_output as ce
-from . import tangent_edge as ta
+from . import contour_geometry as ce
+from . import contour_geometry as ta
 METHOD='CF1_CG1_source_supported_soft_contour_veto'
 EDGE_RADIUS_1K=4.0
 CONTEXT_RADIUS_1K=32.0

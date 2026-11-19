@@ -34,13 +34,13 @@ class NodeCollectionSmokeTests(unittest.TestCase):
         cls.torch = torch
 
     def test_registers_all_node_families(self):
-        y367_ids = {"Y367CF1Destripe", "Y367CE4Destripe"}
+        y367_ids = set()
         try:
             from comfy_api.latest import io
         except ImportError:
             pass
         else:
-            y367_ids.update({"Y367CF1ProtectedDestripe", "Y367CE4ProtectedDestripe"})
+            y367_ids.add("Y367CF1ProtectedDestripe")
         self.assertEqual(
             set(self.package.NODE_CLASS_MAPPINGS),
             {

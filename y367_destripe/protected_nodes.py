@@ -1,4 +1,4 @@
-"""CF1 / CE4 with the fixed ST1 narrow transition and PO1 outlier retreat."""
+"""CF1 with the fixed ST1 narrow transition and PO1 outlier retreat."""
 import json
 from comfy_api.latest import io
 from .guarded_nodes import _Y367GuardedDestripe, ACTUAL8, FLOAT32, ORIENTATIONS
@@ -45,11 +45,5 @@ class Y367CF1ProtectedDestripe(_Y367ProtectedDestripe):
     METHOD_NAME = "Y367-FAST CF1 异常保护"
 
 
-class Y367CE4ProtectedDestripe(_Y367ProtectedDestripe):
-    VARIANT = "CE4_PO1"
-    NODE_ID = "Y367CE4ProtectedDestripe"
-    METHOD_NAME = "Y367-FAST CE4 异常保护"
-
-
-NODE_CLASS_MAPPINGS = {cls.NODE_ID: cls for cls in (Y367CF1ProtectedDestripe, Y367CE4ProtectedDestripe)}
+NODE_CLASS_MAPPINGS = {Y367CF1ProtectedDestripe.NODE_ID: Y367CF1ProtectedDestripe}
 NODE_DISPLAY_NAME_MAPPINGS = {cls.NODE_ID: cls.METHOD_NAME for cls in NODE_CLASS_MAPPINGS.values()}

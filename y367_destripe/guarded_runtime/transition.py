@@ -4,7 +4,7 @@ The original model, five passes, protected pixels and unmodified output bytes st
 import time
 import numpy as np,cv2
 from . import chroma_guard as cg
-from . import contour_edge, edge_output
+from . import contour_edge
 from .codec import directed_round
 from .native_transition import boundary_seeds,seed_lookup,gain_and_target,finish_retreat
 
@@ -42,11 +42,9 @@ def process(rgb,alpha,*,method='CF1',width_1k=6.,orientation='both',keep_edge_pr
     started=time.perf_counter()
     if method=='CF1':
         original = contour_edge.process
-    elif method=='CE4':
-        original = edge_output.process
-    else:raise ValueError('Choose CF1 or CE4')
+    else:raise ValueError('Only CF1 is supported')
     target,eight,report,cache=original(rgb,alpha,orientation=orientation,keep_edge_protection=keep_edge_protection,maps=True)
-    veto=cache['contour_veto'] if method=='CF1' else cache['edge_protected']
+    veto=cache['contour_veto']
     raw,forced=forced_from_cache(rgb,cache,veto)
     seed_policy=veto|(~cache['color_allowed'])|(~cg.admission_mask(raw))
     final,q,tr,d=transition(rgb,target,eight,raw,forced,width_1k=width_1k,seed_policy=seed_policy,maps=True)

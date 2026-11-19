@@ -270,21 +270,21 @@ PureLightMatting 由贡献者确认原创及公开发布权，授权 MIT。Corri
 
 本次验证：真实 ComfyUI 注册24节点；纯光效 IMAGE/原生 VIDEO、Alpha 与帧率保留通过；CorridorKey2 使用现有已验证私有依赖和权重的临时副本，完成256×256单帧 CUDA 推理（float32 RGBA）。干净机器首次 pip 安装和网络权重下载未做端到端验证；引导、下载校验、失败恢复由单元测试覆盖。
 
-## Y367 周期横竖纹去退化（1.9.0）
+## Y367 周期横竖纹去退化（1.9.1）
 
-四个节点分类 `RH-Nodes/restore`：**Y367-FAST CF1**（按轮廓方向保护）、**Y367-FAST CE4**（强边缘及邻域保护），及各自的**异常保护**版（ST1 窄过渡 + PO1 局部异常回撤）。注册 ID 分别为 `Y367CF1Destripe`、`Y367CE4Destripe`、`Y367CF1ProtectedDestripe`、`Y367CE4ProtectedDestripe`。未注册原始无保护版和 PO2。
+仅保留 **Y367-FAST CF1 异常保护**（CF1轮廓方向保护 + ST1窄过渡 + PO1局部异常回撤），ID `Y367CF1ProtectedDestripe`，分类 `RH-Nodes/restore`。基础CF1、CE4及CE4异常保护已清理，旧节点工作流需手动换成保留节点并重新接线；保留节点的ID、参数及三个输出不变。
 
 `Load Image.IMAGE → image`，透明图片另接 `Load Image.MASK → mask`，处理图像 → Save Image。MASK 为透明度（1透明），不是去纹选区；原尺寸、单帧可广播，RGBA 与 MASK 同接须一致。Alpha<0.95 的 RGB 原值保护，Alpha 保留。
 
 `orientation` 默认 both，可选 vertical/horizontal/both；固定48周期、每轴五轮逻辑更新，不自动搜索频率。分析最长边至多640；所选轴分析尺寸须大于120像素，因此小图及极细长素材可能被拒绝。输入仅接受原生8位 RGB/RGBA 的0–1 BHWC，不静默量化任意 FLOAT、HDR 或16位图。CPU逐帧批处理，最多4核预算且执行后恢复线程设置；没有子进程或独立Python。
 
-`output_mode` 默认 actual8，使用冻结定向8位编码；float32 返回最终保护后的FLOAT，标准Save Image仍保存8位，并不等同actual8。原CF1/CE4输出为处理图像、删除量×16、透明度MASK、报告；异常保护版使用 ComfyUI V3 API，输出处理图像、删除量×16、报告。删除量×16以128灰为零，actual8基于真实8位输出，float32基于最终FLOAT。
+`output_mode` 默认 actual8，使用冻结定向8位编码；float32 返回最终保护后的FLOAT，标准Save Image仍保存8位，并不等同actual8。使用 ComfyUI V3 API，输出处理图像、删除量×16、报告。删除量×16以128灰为零，actual8基于真实8位输出，float32基于最终FLOAT。
 
-随包 CNN 权重约101KiB，首次执行有Numba JIT耗时，需要可写缓存位置；安装依赖见根 requirements.txt（增加 numba>=0.65.1、threadpoolctl>=3.6.0）。源环境使用NumPy2.4.4/SciPy1.17.1/Pillow12.2/OpenCV4.13，接入保留根现有下限；测试说明以实际验证环境为准。异常保护版需支持 `comfy_api.latest.io` 的 ComfyUI；缺少V3时仍可加载基础CF1/CE4。
+随包 CNN 权重约101KiB，首次执行有Numba JIT耗时，需要可写缓存位置；安装依赖见根 requirements.txt（numba>=0.65.1、threadpoolctl>=3.6.0）。源环境使用NumPy2.4.4/SciPy1.17.1/Pillow12.2/OpenCV4.13，接入保留根现有下限；需支持 `comfy_api.latest.io` 的 ComfyUI，缺少V3时不注册此节点。
 
 ST1/PO1是风险回撤，不是真实退化判断；可能少删近轮廓真纹、留下弱尖峰和残留，不保证无损。IMAGE不传递ICC。详细原算法说明见 [Y367说明](y367_destripe/README.md)，原创及权重MIT授权、冻结哈希见第三方声明和source_snapshot.json。安装统一插件后将独立Y367-FAST备份移至custom_nodes外，避免重复ID。
 
-本次使用源ComfyUI Python验证，24组四节点×三方向×两输出模式与源插件输出逐值一致；四节点双帧和透明MASK广播、V3 schema/execute及模型wheel打包通过。根依赖较低版本组合未逐一验证。Numba缓存包含导入模块名，移动插件或以临时名称进行测试后须使用独立NUMBA_CACHE_DIR或清理该插件的旧JIT缓存再启动；测试建议使用临时缓存，避免写入生产插件缓存。
+原1.9.0接入完成源输出差分验证；1.9.1清理后重新核对保留节点与合并前CF1异常保护数值一致。根依赖较低版本组合未逐一验证。Numba缓存包含导入模块名，移动插件或以临时名称进行测试后须使用独立NUMBA_CACHE_DIR或清理该插件的旧JIT缓存再启动；测试建议使用临时缓存，避免写入生产插件缓存。
 
 ## 验证
 

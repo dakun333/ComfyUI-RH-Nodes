@@ -1,4 +1,4 @@
-"""ComfyUI IMAGE/MASK adapters for the frozen CE4 and CF1 variants."""
+"""Internal IMAGE/MASK adapter for CF1 ST1 + PO1 protection."""
 from pathlib import Path
 import hashlib, json, sys, time
 import numpy as np
@@ -180,21 +180,3 @@ class _Y367GuardedDestripe:
             "warning": "Current-runtime output/save consistency is not a visual-quality certificate; historical experiment-environment bytes may differ slightly. Color permission does not prove an artifact; edge-following true stripes may be protected. Non-native8 RGB inputs are rejected, not silently quantized. IMAGE carries no original ICC metadata.",
         }, ensure_ascii=False, indent=2, allow_nan=False)
         return torch.stack(outputs), torch.stack(previews), torch.stack(masks), report_text
-
-
-class Y367CE4Destripe(_Y367GuardedDestripe):
-    VARIANT = "CE4"
-    NODE_ID = "Y367CE4Destripe"
-    METHOD_NAME = "Y367-FAST CE4"
-    SEARCH_ALIASES = ["CE4", "Y367", "Y367-FAST", "destripe", "横纹", "竖纹", "边缘保护"]
-    DESCRIPTION = "去除横纹／竖纹，并保护强边缘及其附近区域。\n" + _Y367GuardedDestripe.DESCRIPTION
-
-class Y367CF1Destripe(_Y367GuardedDestripe):
-    VARIANT = "CF1"
-    NODE_ID = "Y367CF1Destripe"
-    METHOD_NAME = "Y367-FAST CF1"
-    SEARCH_ALIASES = ["CF1", "Y367", "Y367-FAST", "destripe", "横纹", "竖纹", "轮廓角度保护"]
-    DESCRIPTION = "去除横纹／竖纹，并按轮廓方向保护边缘。\n" + _Y367GuardedDestripe.DESCRIPTION
-
-NODE_CLASS_MAPPINGS = {"Y367CF1Destripe": Y367CF1Destripe, "Y367CE4Destripe": Y367CE4Destripe}
-NODE_DISPLAY_NAME_MAPPINGS = {"Y367CF1Destripe": "Y367-FAST CF1", "Y367CE4Destripe": "Y367-FAST CE4"}
