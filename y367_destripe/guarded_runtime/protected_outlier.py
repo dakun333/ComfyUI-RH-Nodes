@@ -34,7 +34,7 @@ def outlier_retreat(rgb,st_target,st8,reference_target,protected,*,variant='PO1'
 def process(rgb,alpha,*,method='CF1',variant='PO1',orientation='both',keep_edge_protection=False,maps=False):
     started=time.perf_counter()
     t,eight,report,cache=st_process(rgb,alpha,method=method,width_1k=6.,orientation=orientation,keep_edge_protection=keep_edge_protection,maps=True)
-    protected=cache['contour_veto'] if method=='CF1' else cache['edge_protected']
+    protected=cache['contour_veto']
     out,q,orep,d=outlier_retreat(rgb,t,eight,cache['pre_transition_target'],protected,variant=variant,maps=True)
     report.update(method=method+'_ST1_'+variant,protected_outlier=orep,compute_and_encode_seconds=time.perf_counter()-started,quality_policy_change='ST1 plus local amplitude outlier AND original protection proximity')
     if maps:

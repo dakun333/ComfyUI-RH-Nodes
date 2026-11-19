@@ -1,32 +1,15 @@
-# Y367-FAST 周期去纹
+# Y367-FAST CF1 异常保护
 
-在同一ComfyUI Python和一套依赖中运行，纯CPU；不创建独立环境或子进程。
+1.9.1 仅保留 `Y367CF1ProtectedDestripe`（Y367-FAST CF1 异常保护），分类 `RH-Nodes/restore`。基础CF1、CE4和CE4异常保护已移除，旧节点工作流需手动换成此节点并重新连接三个输出。
 
-| 节点 | 保护方式 |
-|---|---|
-| Y367-FAST CF1 | 按原图轮廓方向保护 |
-| Y367-FAST CE4 | 保护强边缘及附近区域 |
-| Y367-FAST CF1 异常保护 | CF1 + ST1窄过渡 + PO1局部异常回撤 |
-| Y367-FAST CE4 异常保护 | CE4 + ST1窄过渡 + PO1局部异常回撤 |
+保留CF1轮廓方向保护、ST1窄过渡和PO1局部异常回撤；不改变模型、颜色许可、五轮逻辑恢复或保留节点的ID/参数/输出。
 
-原始未加保护的`Y367FastDestripe`已移除，不保留注册别名。现有CF1/CE4名称、接口及输出行为不变。
+Load Image IMAGE → image，透明图片另接MASK → mask，处理图像 → Save Image。MASK是透明度（1透明），不是去纹范围。orientation可选vertical/horizontal/both（默认both），固定48周期。输入为原生8位RGB/RGBA，拒绝任意FLOAT/HDR/16位；原尺寸与Alpha保留，Alpha<0.95的RGB原值保护。
 
-## 使用
+ComfyUI V3输出为处理图像、删除量×16、报告。actual8（默认）适合标准Save Image；float32返回最终FLOAT，标准Save Image仍为8位、不等同冻结actual8编码。删除量×16以128灰为零，基于输入减所选输出。
 
-`Load Image → 去纹节点 → Save Image`。连接透明图片的Load Image MASK；MASK是透明度，不是去纹范围。选择vertical（竖纹）、horizontal（横纹）或both（联合）。固定48周期、每轴五轮逻辑更新，精确固定点复用不减少逻辑轮次。
+CPU最多4核预算、批次逐帧，无独立环境/子进程。所选轴分析尺寸须大于120，首次执行包含Numba JIT。依赖见根requirements.txt，需要ComfyUI V3 API。
 
-默认actual8适合标准Save Image。float32返回最终FLOAT，标准Save Image仍会保存8位，不能等同于本版定向编码。输入须为原生8位RGB/RGBA；不静默量化任意FLOAT。尺寸与Alpha保持，IMAGE不传递原ICC元数据。
+ST1仅对策略造成断点的允许侧做窄过渡；PO1对靠近保护区且幅度异常的已允许校正回撤，不增加CNN/FFT/恢复轮次。这是风险回撤，不是真实退化判定；可能少删近轮廓真纹、留下弱残留。IMAGE不传递ICC。
 
-新异常保护节点输出处理图像、删除量×16和报告；Alpha随处理图像保留，不额外输出透传MASK。现有CF1/CE4仍保留原四个输出，兼容已有连线。
-
-删除量×16以128灰为零，来自输入RGB减实际8位输出（actual8）或最终FLOAT（float32），不做饱和度增强。
-
-## ST1 + PO1
-
-ST1只在策略造成的断点允许侧做窄过渡，宽度为短边1024像素时6像素。PO1仅在靠近原保护区且幅度超过局部参考约2倍时额外回撤；不扩大原保护区、不全图限幅、不向原零删除区扩散。FLOAT校正保持整份RGB方向，实际8位各通道不比ST1更激进。
-
-检测模型、颜色许可及五轮处理不变，新增步骤不增加CNN、FFT或恢复轮次。较强PO2不注册、不开放。
-
-这属于风险回撤，不是误删真值判定；近轮廓的强真实纹理可能少删，弱尖峰和旧残留也可能保留。首次执行包含Numba JIT，热耗时不代表冷启动保证。
-
-RH接入使用仓库根`requirements.txt`，原始文件哈希见`source_snapshot.json`。保留运行核心和模型，分类调整为`RH-Nodes/restore`；异常保护版需ComfyUI V3 API。贡献者确认算法、封装及权重为原创并授权MIT发布。源码快照来源为未独立Git跟踪的本地Y367-FAST目录。
+原始快照哈希保留于source_snapshot.json用于溯源。1.9.1删除其他节点及独立算法入口，将CF1需要的几何/整像素输出帮助函数收拢到contour_geometry.py。算法、封装与模型由贡献者授权MIT发布。
