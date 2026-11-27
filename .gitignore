@@ -9,3 +9,27 @@ dist/
 venv/
 .env
 .DS_Store
+
+# Native matting code only: checkpoints and runtime assets are local resources.
+corridorkey2_native/runtime/weights/
+corridorkey2_native/runtime/vfms/
+corridorkey2_native/runtime/.hf_cache/
+corridorkey2_native/logs/
+corridorkey2_native/.assets.lock
+corridorkey2_native/.verified_assets.json
+corridorkey2_native/**/*.safetensors
+corridorkey2_native/**/*.pt
+corridorkey2_native/**/*.pth
+corridorkey2_native/**/*.ckpt
+corridorkey2_native/**/*.npz
+corridorkey2_native/**/*.bin
+corridorkey2_native/**/*.onnx
+vrmbg3_v6/models/
+vrmbg3_v6/**/*.safetensors
+vrmbg3_v6/**/*.pt
+vrmbg3_v6/**/*.pth
+vrmbg3_v6/**/*.ckpt
+vrmbg3_v6/**/*.npz
+vrmbg3_v6/**/*.bin
+vrmbg3_v6/**/*.onnx
+*.partial

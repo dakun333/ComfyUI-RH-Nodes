@@ -1,0 +1,18 @@
+{
+  "archive_name": "ComfyUI-Mekajiki-UnMult_before_RH_1.6.1_20261027_154325.zip",
+  "archive_sha256": "c4edb389f1f9c519db197b803f3c519ab52e6c03282e4165f6a0527d02681b27",
+  "source_nodes_sha256": "94674b458ffb059f8ef55695e70c04da14d97ebc4fd2fb58c1c01fdcaee4fc6c",
+  "source_thin_edge_sha256": "5aed08b42250b703e6987c1ec218f5bb9a68f4e2889908d9193eb8799a2c5ff0",
+  "selected_algorithm": "MekajikiMaskedUnMult, Q, allow_alpha_adjustment=False, 2026-10-27 thin-edge policy",
+  "adaptations": [
+    "Only masked Q and its two shared RGB helpers included; Auto Alpha/dither/registration/UI omitted.",
+    "Optional alpha adjustment fixed to False and removed; no gray17 branch included.",
+    "No-grad geometry decorators removed and imports moved to module scope; numerical geometry unchanged."
+  ],
+  "color_space": "source encoded numeric RGB; no automatic linear-light conversion",
+  "redistribution": "Contributor confirmed original algorithm publication rights and authorized MIT redistribution with RH-nodes.",
+  "installed_sha256": {
+    "core.py": "6bd55ec826170d486548f46c7eeab56e455c78958ca5a5f249f91ef638757a01",
+    "thin_edge_bypass.py": "fddefb0b4adab0a1c4a61641084845d9ac7b713e5a29d5cd20edc4dc45a6ed79"
+  }
+}

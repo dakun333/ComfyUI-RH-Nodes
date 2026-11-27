@@ -7,3 +7,8 @@ scipy                    # cKDTree / cg / distance_transform_edt
 PyMaxflow==1.3.2         # GPL-3.0，仅 method=B 使用，见 THIRD_PARTY_NOTICES.md
 numba>=0.65.1           # Y367 CPU4 / ST1 / PO1 JIT kernels
 threadpoolctl>=3.6.0    # Y367 scoped BLAS thread budget
+timm                   # Native CorridorKey2 / VRMBG3 model architecture
+imageio-ffmpeg>=0.6.0,<0.7  # VRMBG3 alpha MOV / preview / alpha16 encoding
+pymatting              # VRMBG3 fixed-Alpha foreground/background color recovery
+av                     # Native VIDEO decoding / alpha-aware exports (usually supplied by ComfyUI)
+safetensors            # Native checkpoint metadata / conversion and VRMBG loading

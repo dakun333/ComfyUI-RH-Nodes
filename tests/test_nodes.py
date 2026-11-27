@@ -34,13 +34,18 @@ class NodeCollectionSmokeTests(unittest.TestCase):
         cls.torch = torch
 
     def test_registers_all_node_families(self):
-        y367_ids = set()
+        optional_ids = set()
         try:
             from comfy_api.latest import io
         except ImportError:
             pass
         else:
-            y367_ids.add("Y367CF1ProtectedDestripe")
+            optional_ids.add("Y367CF1ProtectedDestripe")
+        if hasattr(self.package, '_NATIVE_CORRIDOR_MAPPINGS'):
+            optional_ids.add('CorridorKey2Native')
+        if hasattr(self.package, '_VRMBG_MAPPINGS'):
+            optional_ids.update({'VRMBG3V6Loader', 'VRMBG3V6Matting', 'VRMBG3V6LoadVideo',
+                                 'VRMBG3V6SaveVideo', 'VRMBG3V6MattingVideo'})
         self.assertEqual(
             set(self.package.NODE_CLASS_MAPPINGS),
             {
@@ -68,7 +73,7 @@ class NodeCollectionSmokeTests(unittest.TestCase):
                 "SharedColorBroadbandDestripe",
                 "CorridorKey2Matting",
                 "PureLightMatting",
-            } | y367_ids,
+            } | optional_ids,
         )
 
     def test_comic_outline_preserves_batch_shape(self):

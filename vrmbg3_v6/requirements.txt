@@ -1,0 +1,5 @@
+imageio-ffmpeg>=0.6.0,<0.7
+# Existing ComfyUI torch/torchvision and installed timm/transformers/einops/safetensors/av are reused.
+
+# Fixed-Alpha local foreground/background color recovery.
+pymatting

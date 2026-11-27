@@ -1,0 +1,273 @@
+{
+  "last_node_id": 4,
+  "last_link_id": 6,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "VRMBG3V6LoadVideo",
+      "pos": [
+        30,
+        80
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            1
+          ]
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "links": [
+            6
+          ]
+        },
+        {
+          "name": "source_path",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "video_info",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VRMBG3V6LoadVideo"
+      },
+      "widgets_values": [
+        "14622bc351ce4d70b2520e8ac346cbe5.mov",
+        300,
+        0
+      ]
+    },
+    {
+      "id": 2,
+      "type": "VRMBG3V6Loader",
+      "pos": [
+        30,
+        350
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "VRMBG3_V6_MODEL",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VRMBG3V6Loader"
+      },
+      "widgets_values": [
+        "V6_ep2/v6_epoch002_s000037440.safetensors"
+      ]
+    },
+    {
+      "id": 3,
+      "type": "VRMBG3V6Matting",
+      "pos": [
+        450,
+        110
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "VRMBG3_V6_MODEL",
+          "link": 2
+        },
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "rgba",
+          "type": "IMAGE",
+          "links": [
+            3
+          ]
+        },
+        {
+          "name": "alpha",
+          "type": "MASK",
+          "links": [
+            4
+          ]
+        },
+        {
+          "name": "checker_preview",
+          "type": "IMAGE",
+          "links": []
+        },
+        {
+          "name": "run_info",
+          "type": "STRING",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VRMBG3V6Matting"
+      },
+      "widgets_values": [
+        1048576,
+        "bf16",
+        true,
+        true
+      ]
+    },
+    {
+      "id": 4,
+      "type": "VRMBG3V6SaveVideo",
+      "pos": [
+        880,
+        110
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "rgba",
+          "type": "IMAGE",
+          "link": 3
+        },
+        {
+          "name": "alpha",
+          "type": "MASK",
+          "link": 4
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "link": 6,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "run_info",
+          "type": "STRING",
+          "link": 5,
+          "widget": {
+            "name": "run_info"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "saved_files",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VRMBG3V6SaveVideo"
+      },
+      "widgets_values": [
+        24.0,
+        "VRMBG3/V6_ep2",
+        true,
+        "",
+        "prores_4444"
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      3,
+      1,
+      "IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "VRMBG3_V6_MODEL"
+    ],
+    [
+      3,
+      3,
+      0,
+      4,
+      0,
+      "IMAGE"
+    ],
+    [
+      4,
+      3,
+      1,
+      4,
+      1,
+      "MASK"
+    ],
+    [
+      5,
+      3,
+      3,
+      4,
+      3,
+      "STRING"
+    ],
+    [
+      6,
+      1,
+      1,
+      4,
+      2,
+      "FLOAT"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.8,
+      "offset": [
+        25,
+        25
+      ]
+    }
+  },
+  "version": 0.4
+}

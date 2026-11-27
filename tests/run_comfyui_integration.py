@@ -62,6 +62,12 @@ def main():
             "CorridorKey2Matting",
             "PureLightMatting",
             "Y367CF1ProtectedDestripe",
+            "CorridorKey2Native",
+            "VRMBG3V6Loader",
+            "VRMBG3V6Matting",
+            "VRMBG3V6LoadVideo",
+            "VRMBG3V6SaveVideo",
+            "VRMBG3V6MattingVideo",
         }
         registered = set(package.NODE_CLASS_MAPPINGS)
         if not expected <= registered:
