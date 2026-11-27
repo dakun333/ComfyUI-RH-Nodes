@@ -1,0 +1,63 @@
+{
+  "1": {
+    "class_type": "LoadVideo",
+    "inputs": {
+      "file": "14622bc351ce4d70b2520e8ac346cbe5.mov"
+    }
+  },
+  "2": {
+    "class_type": "VRMBG3V6Loader",
+    "inputs": {
+      "model_name": "localhalo381_epoch004_s000071232.safetensors"
+    }
+  },
+  "3": {
+    "class_type": "VRMBG3V6MattingVideo",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "video": [
+        "1",
+        0
+      ],
+      "max_pixels": 1048576,
+      "precision": "bf16",
+      "temporal": true,
+      "offload_after": true,
+      "alpha_shrink": 0,
+      "alpha_feather": 0.0,
+      "enable_alpha_unmult": false,
+      "color_recovery_method": "multilevel"
+    }
+  },
+  "4": {
+    "class_type": "VRMBG3V6SaveVideo",
+    "inputs": {
+      "rgba": [
+        "3",
+        0
+      ],
+      "alpha": [
+        "3",
+        1
+      ],
+      "fps": [
+        "3",
+        4
+      ],
+      "audio": [
+        "3",
+        5
+      ],
+      "run_info": [
+        "3",
+        3
+      ],
+      "filename_prefix": "VRMBG3/localhalo381_ep4",
+      "save_alpha16": true,
+      "mov_codec": "prores_4444"
+    }
+  }
+}

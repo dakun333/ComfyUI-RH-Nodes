@@ -286,6 +286,20 @@ ST1/PO1是风险回撤，不是真实退化判断；可能少删近轮廓真纹�
 
 原1.9.0接入完成源输出差分验证；1.9.1清理后重新核对保留节点与合并前CF1异常保护数值一致。根依赖较低版本组合未逐一验证。Numba缓存包含导入模块名，移动插件或以临时名称进行测试后须使用独立NUMBA_CACHE_DIR或清理该插件的旧JIT缓存再启动；测试建议使用临时缓存，避免写入生产插件缓存。
 
+## Native CorridorKey2 / VRMBG3-V6（1.10.0）
+
+新增独立节点族，分类均为 `RH-Nodes/matting`；安装依赖见根requirements.txt（增加timm、imageio-ffmpeg、pymatting）。两模块的源码与wheel均不提供权重，checkpoint须另行放入ComfyUI `models/checkpoints/`，不使用Git LFS。
+
+**纯色底去背（宿主依赖版）**（`CorridorKey2Native`）保留源V3 IMAGE/VIDEO接口和六输出。复用ComfyUI现有Python/site-packages，实际推理仍由同解释器的一次性worker执行；不创建python_deps/私有环境，不在执行时运行pip。优先使用已安装utils3d，仅缺失时使用随模块的源码。默认完整checkpoint `corridorkey2_full.safetensors` 约4.94GB，含Stage1/2、C-RADIO、MoGe和RVM，精度不变；存在合法合并文件时不访问原多文件权重。默认文件缺失时首次执行沿用官方固定manifest下载原权重并CPU转换/逐张量验证，需要额外空间。需NVIDIA CUDA及支持V3的ComfyUI，普通SD加载器不能读该checkpoint。Alpha收缩/羽化默认0/0，先灰度腐蚀再Gaussian，只改Alpha，不改预测straight RGB。详见[Native说明](corridorkey2_native/README.md)。
+
+**VRMBG3-V6**保留五节点：模型加载、IMAGE时序去背、原生VIDEO去背、加载视频帧、保存透明MOV+预览。默认私有 `localhalo381_epoch004_s000071232.safetensors`（约844MiB），严格SHA校验；兼容旧V6_ep2，需自行取得合法文件，无自动下载。IMAGE是连续视频序列，temporal默认True，每次调用重置历史；模型像素预算至多1M，输出恢复原生尺寸。FP32权重/BF16前向默认，offload_after默认True。Alpha为1前景，收缩/羽化默认0/0；颜色反算默认关闭，开启后multilevel（PyMatting）或legacy_q，不改变Alpha和模型历史。详见[VRMBG说明](vrmbg3_v6/README.md)。
+
+VRMBG文件VIDEO超过1GiB RGB采用逐帧解码+FP32磁盘映射，保留全部帧及时序，临时盘需求另见说明；VFR拒绝，不静默重定时。保存透明ProRes4444或qtrle MOV、棋盘MP4、可选16位Alpha和元数据，音频显式传接；预览JS位于根web/，重启后端并刷新浏览器加载。Native输出VIDEO保留源帧率/音频，images/video输出分支互斥。
+
+模型代码均保留各自上游许可及授权声明，BRIA和CorridorKey源码不属于根MIT范围，详见第三方声明。两个源插件是本地非独立Git文件快照，原哈希已保存。各自示例工作流随包提供，需选择自己的素材。迁移时将同ID的独立插件移至custom_nodes外备份，避免重复注册。
+
+本次验证：真实ComfyUI注册31节点；Native版无原weights/vfms目录，仅用合并checkpoint完成两帧256×256 GPU推理，默认IMAGE及Alpha后处理VIDEO与源插件逐值一致。VRMBG默认/Alpha清理/multilevel/legacy_q四组双帧GPU输出与源一致；原生VIDEO帧率和音频、透明qtrle MOV及Alpha16回读、预览载荷通过。检查源码和wheel均无新增权重。全新环境下载转换及长视频/浏览器预览未做本次端到端验证，源记录不替代这些检查。
+
 ## 验证
 
 使用 ComfyUI 的 Python 并在仓库目录运行：

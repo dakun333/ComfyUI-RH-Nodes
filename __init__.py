@@ -120,10 +120,30 @@ try:
 except Exception as exc:
     _IMPORT_ERRORS.append(f"Y367 Destripe: {exc}")
 
+try:
+    from .corridorkey2_native import (
+        NODE_CLASS_MAPPINGS as _NATIVE_CORRIDOR_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _NATIVE_CORRIDOR_DISPLAY_MAPPINGS,
+    )
+    _register(_NATIVE_CORRIDOR_MAPPINGS, _NATIVE_CORRIDOR_DISPLAY_MAPPINGS)
+except Exception as exc:
+    _IMPORT_ERRORS.append(f"Native CorridorKey2: {exc}")
+
+try:
+    from .vrmbg3_v6 import (
+        NODE_CLASS_MAPPINGS as _VRMBG_MAPPINGS,
+        NODE_DISPLAY_NAME_MAPPINGS as _VRMBG_DISPLAY_MAPPINGS,
+    )
+    _register(_VRMBG_MAPPINGS, _VRMBG_DISPLAY_MAPPINGS)
+except Exception as exc:
+    _IMPORT_ERRORS.append(f"VRMBG3 V6: {exc}")
+
+WEB_DIRECTORY = "./web"
+
 if _IMPORT_ERRORS:
     print("[RH Nodes] Some node families could not be loaded:")
     for error in _IMPORT_ERRORS:
         print(f"  - {error}")
 
-__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]
-__version__ = "1.9.1"
+__all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS", "WEB_DIRECTORY"]
+__version__ = "1.10.0"

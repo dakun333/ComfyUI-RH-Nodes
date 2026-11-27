@@ -1,0 +1,11 @@
+{
+  "architectures": [
+    "VRMBG3"
+  ],
+  "auto_map": {
+    "AutoConfig": "vrmbg3_config.VRMBG3Config",
+    "AutoModelForImageSegmentation": "model.BiRefNet"
+  },
+  "model_type": "vrmbg3",
+  "in_channels": 6
+}

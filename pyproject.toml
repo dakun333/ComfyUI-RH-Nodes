@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "comfyui-rh-nodes"
-version = "1.9.1"
+version = "1.10.0"
 description = "A maintained ComfyUI image-node collection with restoration, matting, color matching, outlines, and BBOX tools."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -28,7 +28,7 @@ Icon = ""
 dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools]
-license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "corridorkey2/LICENSE", "corridorkey2/runtime/LICENSE", "corridorkey2/runtime/third_party/MoGe/LICENSE"]
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "corridorkey2/LICENSE", "corridorkey2/runtime/LICENSE", "corridorkey2/runtime/third_party/MoGe/LICENSE", "corridorkey2_native/LICENSE", "corridorkey2_native/runtime/LICENSE", "corridorkey2_native/runtime/third_party/MoGe/LICENSE", "corridorkey2_native/vendor/UTILS3D_LICENSE"]
 include-package-data = false
 packages = [
   "comfyui_rh_nodes",
@@ -42,6 +42,11 @@ packages = [
   "comfyui_rh_nodes.pure_light_matting",
   "comfyui_rh_nodes.y367_destripe",
   "comfyui_rh_nodes.y367_destripe.guarded_runtime",
+  "comfyui_rh_nodes.corridorkey2_native",
+  "comfyui_rh_nodes.vrmbg3_v6",
+  "comfyui_rh_nodes.vrmbg3_v6.vendor",
+  "comfyui_rh_nodes.vrmbg3_v6.vendor.bria_vrmbg3",
+  "comfyui_rh_nodes.vrmbg3_v6.vendor.mekajiki_unmult",
 ]
 
 [tool.setuptools.package-dir]
@@ -56,13 +61,23 @@ comfyui_rh_nodes = "."
 "comfyui_rh_nodes.pure_light_matting" = "pure_light_matting"
 "comfyui_rh_nodes.y367_destripe" = "y367_destripe"
 "comfyui_rh_nodes.y367_destripe.guarded_runtime" = "y367_destripe/guarded_runtime"
+"comfyui_rh_nodes.corridorkey2_native" = "corridorkey2_native"
+"comfyui_rh_nodes.vrmbg3_v6" = "vrmbg3_v6"
+"comfyui_rh_nodes.vrmbg3_v6.vendor" = "vrmbg3_v6/vendor"
+"comfyui_rh_nodes.vrmbg3_v6.vendor.bria_vrmbg3" = "vrmbg3_v6/vendor/bria_vrmbg3"
+"comfyui_rh_nodes.vrmbg3_v6.vendor.mekajiki_unmult" = "vrmbg3_v6/vendor/mekajiki_unmult"
 
 [tool.setuptools.package-data]
+"comfyui_rh_nodes" = ["web/*.js"]
 "comfyui_rh_nodes.seedream_color_reuse" = ["core_provenance.json", "examples/*.json"]
 "comfyui_rh_nodes.corridorkey2" = ["*.json", "*.txt", "*.md", "*.ps1", "LICENSE", "runtime/**/*.py", "runtime/**/LICENSE", "runtime/*.md", "runtime/third_party/MoGe/*.md", "api_examples/*.json", "example_workflows/*.json"]
 "comfyui_rh_nodes.pure_light_matting" = ["*.json", "*.md", "api_examples/*.json", "example_workflows/*.json"]
 "comfyui_rh_nodes.y367_destripe" = ["source_snapshot.json", "README.md", "examples/*.json"]
 "comfyui_rh_nodes.y367_destripe.guarded_runtime" = ["model.npz"]
+"comfyui_rh_nodes.corridorkey2_native" = ["*.json", "*.txt", "*.md", "LICENSE", "runtime/**/*.py", "runtime/**/*.json", "runtime/**/LICENSE", "runtime/**/*.md", "vendor/**/*.py", "vendor/*.json", "vendor/UTILS3D_LICENSE", "api_examples/*.json", "example_workflows/*.json"]
+"comfyui_rh_nodes.vrmbg3_v6" = ["*.md", "*.json", "example_workflows/*.json"]
+"comfyui_rh_nodes.vrmbg3_v6.vendor.bria_vrmbg3" = ["*.json", "README.md"]
+"comfyui_rh_nodes.vrmbg3_v6.vendor.mekajiki_unmult" = ["SOURCE.json"]
 
 [tool.setuptools.exclude-package-data]
-"*" = ["*.pyc", "*.pyo", "__pycache__/*"]
+"*" = ["*.pyc", "*.pyo", "__pycache__/*", "*.safetensors", "*.pt", "*.pth", "*.ckpt", "*.bin", "*.onnx"]

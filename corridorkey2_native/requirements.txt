@@ -1,0 +1,3 @@
+# Additional packages; reuse installed versions when satisfied.
+timm
+opencv-python

@@ -1,0 +1,32 @@
+{
+  "source": "ComfyUI-VRMBG3-V6",
+  "snapshot_date": "2026-11-27",
+  "git_provenance": "Source is not an independent git repository; parent ComfyUI revision is not source provenance.",
+  "weights_included": false,
+  "redistribution_authorization": "Contributor confirmed Native upstream redistribution authorization; BRIA source redistribution authorized; original wrappers and legacy Q authorized MIT.",
+  "original_files_sha256": {
+    "batch_memory.py": "9e45d6dfa89fc954d3ba1fa4d1a806c0a78dfd0928977c3fbd04bee13a3b94bf",
+    "foreground_color.py": "6d337876faab134bd134b5281c44969af41c985a9c56b9fda0112eae95fabe2a",
+    "nodes.py": "0aec117997ea46b664600642f83ce25cea3bb3b7aaf207435a8afde16dff7020",
+    "README.md": "3bae85de7259d2c4ea8cd042453bd937e552f4fc9631bf3123d425697f2d92a6",
+    "requirements.txt": "973ec9f7d82d95b55ee65df94b657e4affd990db2c3c284d79bf09173d9b73fa",
+    "video_nodes.py": "cf8d02312eafa1c9fa7a6e1a9c2800046a2831d7fe24edde8c779a87f3a5abdc",
+    "__init__.py": "d4cd6cd4235d517875ac76f6b39f6b4e57f8a6cb23c6ed340f9f37d138fd13d5",
+    "example_workflows/VRMBG3_default_native_video_mov.json": "57176ce375031a578bd78f9aab1ae0cefbb11d6fef8f5ba3907b364ea6c77df6",
+    "example_workflows/VRMBG3_default_video_api.json": "b098d6006526cc4857abd1a9130e7e6860500e86a0ea30d1f2ef2d537a9aa75e",
+    "example_workflows/VRMBG3_V6_ep2_frames_mov.json": "c2d3f84397f5ed2ef568d04f13949b5574a4a6d53e4b4585c8213b59397f0ab1",
+    "example_workflows/VRMBG3_V6_ep2_native_video_mov.json": "c2cab7ba6888cb720f735aa21bc62ff8d724e5f7a53ad144f1a18aaee41f96ab",
+    "example_workflows/VRMBG3_V6_ep2_video.json": "c2cab7ba6888cb720f735aa21bc62ff8d724e5f7a53ad144f1a18aaee41f96ab",
+    "example_workflows/VRMBG3_V6_ep2_video_api.json": "f6d0b61e9aaf29119e16909e2571698ddf1087c5f89171985c4977cf3922a7f1",
+    "web/preview.js": "5887c9e49cf0602dd91353ad7464fca9ddd6db2be509ac3b3bfb4c2bfb3ee36e",
+    "vendor/bria_vrmbg3/config.json": "833cbc1fdfe95799afa4c070dbeb957ca885cdca5e0a173619d5c3852ccc1c0a",
+    "vendor/bria_vrmbg3/model.py": "7cf51fe6907f79be8eadbd7cc75648eac2e8415152721d6e296d608eb0333b2b",
+    "vendor/bria_vrmbg3/README.md": "c530758cceb9266f66c3ebdd87d19bf364b4d8d69fbafa2b8bac3259942b7383",
+    "vendor/bria_vrmbg3/vrmbg3_config.py": "051ce339a8aa419d6e41d08204879b5cc528b7b90d9e665ca05b516a80e2515e",
+    "vendor/bria_vrmbg3/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "vendor/mekajiki_unmult/core.py": "6bd55ec826170d486548f46c7eeab56e455c78958ca5a5f249f91ef638757a01",
+    "vendor/mekajiki_unmult/SOURCE.json": "a68ee33fa800f0532db9df20670135894cedb61e40d1be5802304c895b5afa6f",
+    "vendor/mekajiki_unmult/thin_edge_bypass.py": "fddefb0b4adab0a1c4a61641084845d9ac7b713e5a29d5cd20edc4dc45a6ed79",
+    "vendor/mekajiki_unmult/__init__.py": "cc9520dd0867f547e6609f17ef000b36841ba7757b7b6bf2210a900beb0c2dfb"
+  }
+}

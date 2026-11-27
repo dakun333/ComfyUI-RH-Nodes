@@ -1,11 +1,19 @@
 # Third-Party Notices
 
+## Native CorridorKey2 与 VRMBG3-V6（1.10.0）
+
+两模块来自2026-11-27本地文件快照，源码原哈希保留在各自source_snapshot.json，均不包含模型权重。贡献者确认Native版的完整上游源码及封装再分发授权，以及BRIA源码此次公开集成/再分发授权；自写VRMBG封装与legacy_q算法授权MIT。
+
+Native CorridorKey2仍保留Corridor Key Licence，C-RADIO使用NVIDIA Open Model License，MoGe/DINOv2、RVM和utils3d保留各自许可。详见corridorkey2_native/THIRD_PARTY_NOTICES.md和LICENSE；合并checkpoint不改变各模型许可。
+
+VRMBG3结构代码仍为BRIA专有许可，不在根MIT范围；上游模型卡原文保留，商业/学术使用依上游授权。随源未提供完整BRIA LICENSE文本；详见vrmbg3_v6/THIRD_PARTY_NOTICES.md。本仓库不分发私有训练权重，也不授予其使用或训练数据权限。
+
 ## Y367 去纹（1.9.0）
 
 `y367_destripe/` 来自贡献者的 Y367-FAST 2026-11-18 本地文件快照。贡献者已确认算法、封装及 CNN 权重均为原创并授权按根 MIT 许可证公开发布。模型随包提供，SHA-256：`32c4375a718762bec6352c12f320d3f760a04cc03a8b39ba46f2d09967870268`；原文件哈希见 `source_snapshot.json`。Numba（BSD-2-Clause）、llvmlite（BSD-style / LLVM）、threadpoolctl（BSD-3-Clause）及 NumPy/SciPy/OpenCV/Pillow 保留各自许可证，不作为本仓库源码授权。
 
 This repository contains MIT-licensed project source code and the separately
-licensed CorridorKey2 module described below. It declares external
+licensed CorridorKey2, Native CorridorKey2 and BRIA VRMBG3 modules described here. It declares external
 Python packages in `requirements.txt`. Those packages are installed separately
 and retain their own licenses.
 

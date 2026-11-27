@@ -1,0 +1,51 @@
+{
+  "1": {
+    "class_type": "LoadVideo",
+    "inputs": {
+      "file": "CorridorKey2_install_test.mp4"
+    }
+  },
+  "2": {
+    "class_type": "CorridorKey2Native",
+    "inputs": {
+      "video": [
+        "1",
+        0
+      ],
+      "fps": 24,
+      "carry_hint": true,
+      "despill_strength": 0,
+      "low_vram": true,
+      "hann_chunk": 2,
+      "hann_stride": 1,
+      "model_scale": 0.5,
+      "seed": 0,
+      "hint_quality": 0.95,
+      "invert_hint_mask": false,
+      "temp_directory": "",
+      "output_mode": "images",
+      "checkpoint": "corridorkey2_full.safetensors",
+      "alpha_shrink": 0,
+      "alpha_feather": 0.0
+    }
+  },
+  "3": {
+    "class_type": "SaveImage",
+    "inputs": {
+      "images": [
+        "2",
+        2
+      ],
+      "filename_prefix": "CorridorKey2Native/test_images"
+    }
+  },
+  "4": {
+    "class_type": "PreviewImage",
+    "inputs": {
+      "images": [
+        "2",
+        3
+      ]
+    }
+  }
+}

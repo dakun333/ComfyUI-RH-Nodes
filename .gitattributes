@@ -2,3 +2,10 @@
 corridorkey2/runtime/** whitespace=-blank-at-eol,-blank-at-eof
 pure_light_matting/light_unmult.py whitespace=-blank-at-eof
 y367_destripe/guarded_runtime/** whitespace=-blank-at-eof
+corridorkey2_native/runtime/** whitespace=-blank-at-eol,-blank-at-eof
+corridorkey2_native/vendor/** whitespace=-blank-at-eol,-blank-at-eof
+vrmbg3_v6/vendor/** whitespace=-blank-at-eol,-blank-at-eof
+# The VRMBG loader checks these exact upstream byte hashes, including line endings.
+vrmbg3_v6/vendor/bria_vrmbg3/model.py -text
+vrmbg3_v6/vendor/bria_vrmbg3/vrmbg3_config.py -text
+vrmbg3_v6/vendor/bria_vrmbg3/config.json -text

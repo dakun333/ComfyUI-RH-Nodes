@@ -1,0 +1,59 @@
+{
+  "1": {
+    "class_type": "LoadVideo",
+    "inputs": {
+      "file": "14622bc351ce4d70b2520e8ac346cbe5.mov"
+    }
+  },
+  "2": {
+    "class_type": "VRMBG3V6Loader",
+    "inputs": {
+      "model_name": "V6_ep2/v6_epoch002_s000037440.safetensors"
+    }
+  },
+  "3": {
+    "class_type": "VRMBG3V6MattingVideo",
+    "inputs": {
+      "model": [
+        "2",
+        0
+      ],
+      "video": [
+        "1",
+        0
+      ],
+      "max_pixels": 1048576,
+      "precision": "bf16",
+      "temporal": true,
+      "offload_after": true
+    }
+  },
+  "4": {
+    "class_type": "VRMBG3V6SaveVideo",
+    "inputs": {
+      "rgba": [
+        "3",
+        0
+      ],
+      "alpha": [
+        "3",
+        1
+      ],
+      "fps": [
+        "3",
+        4
+      ],
+      "audio": [
+        "3",
+        5
+      ],
+      "run_info": [
+        "3",
+        3
+      ],
+      "filename_prefix": "VRMBG3/V6_ep2",
+      "save_alpha16": true,
+      "mov_codec": "prores_4444"
+    }
+  }
+}
